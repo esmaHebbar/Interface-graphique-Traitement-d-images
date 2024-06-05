@@ -1,63 +1,106 @@
-# -*- coding: utf-8 -*-
 """
 Created on Wed Jun  5 10:29:16 2024
-@author: esma et guillaume
+@authors: esma et guillaume
+
 """
+
+#Importation des bibliothèques nécessaires :
 import numpy as np
 import pyqtgraph as pg
 from PyQt5.QtWidgets import QApplication, QMainWindow, QTabWidget, QWidget, QVBoxLayout
+# Importation de Brian2 (simulateur pour les réseaux de neurones à impulsions) :
 from brian2 import *
 
-# Configure the appearance of pyqtgraph
-pg.setConfigOption('background', 'w')
-pg.setConfigOption('foreground', 'k') 
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-# Création de l'application et de la fenêtre principale
+# On met la couleur de fond de pyqtgraph (pg) en blanc
+pg.setConfigOption('background', 'w') 
+
+# Création de la fenêtre principale, et création des instances QApplication et QMainWindow
 app = QApplication([])
 window = QMainWindow()
-window.setWindowTitle('Oscilloscope Modulaire')
+window.setWindowTitle('Interface graphique modulaire - Oscilloscope')
 
-# Configurations des onglets
-tab_widget = QTabWidget()
-window.setCentralWidget(tab_widget)
+# Configuration des onglets de la fenêtre principale
+tab_widget = QTabWidget()# création d'un widget d'onglets
+window.setCentralWidget(tab_widget) # définition du widget d'onglets comme widget central de la fenêtre
 
-# Simulation Neuronale avec Brian2
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+N = 5000
+Vr = 10*mV
+theta = 20*mV
+tau = 20*ms
+delta = 2*ms
+taurefr = 2*ms
+duration = .1*second
+C = 1000
+sparseness = float(C)/N
+J = .1*mV
+muext = 25*mV
+sigmaext = 1*mV
+
+# Fonction de simulation neuronale
 def run_neuron_simulation():
-    start_scope()  # Initialisation de Brian2 pour un nouveau scope de simulation
+    start_scope() # initialisation d'un nouveau contexte de simulation avec Brian2
 
-    tau = 10*ms  # Constante de temps
+    tau = 10*ms  # constante de temps du modèle neuronal
+    
+    # Équations différentielles décrivant le modèle du neurone
     eqs = '''
     dv/dt = (1-v)/tau : 1
-    '''  # Équations différentielles décrivant le modèle du neurone
-
+    '''  
+    # Création d'un groupe de neurones :
     G = NeuronGroup(1, eqs, threshold='v>0.8', reset='v = 0', method='exact')
+    
+    # Surveille et enregistre la variable 'v'
     M = StateMonitor(G, 'v', record=True)  # Enregistrement de la variable 'v'
-    run(50*ms)  # Durée de la simulation
+    Sp = SpikeMonitor(G)# Surveille et enregistre les moments des spikes
+    
+    run(50*ms)
+    
+    spike_times = Sp.t/ms if len(Sp.t) > 0 else np.array([])  # Renvoie les moments d'apparition des spikes en ms,  retourne un array vide si aucun spikes car sinon erreur
+    
+    return M.t/ms, M.v[0], spike_times  # Retourne le temps en ms, la tension membranaire, et les moments d'apparition des spikes
 
-    return M.t/ms, M.v[0]  # Retourne le temps en ms et la tension membranaire
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-# Onglet pour l'oscilloscope
-tab1 = QWidget()
-tab_widget.addTab(tab1, "Oscilloscope")
-tab1.layout = QVBoxLayout()
+# Premier onglet :
+    
+tab1 = QWidget() # Crée un widget pour le premier onglet
+tab_widget.addTab(tab1, "Oscilloscope")# ajout de l'onglet à la barre d'onglets
+tab1.layout = QVBoxLayout() # Crée et définit une disposition verticale pour l'onglet
 tab1.setLayout(tab1.layout)
-plot_widget = pg.PlotWidget()
-tab1.layout.addWidget(plot_widget)
 
-time, voltage = run_neuron_simulation()  # Exécution de la simulation neuronale
-plot_widget.plot(time, voltage)  # Affichage du résultat de la simulation
+plot_widget = pg.PlotWidget()# Crée un widget de tracé pour l'oscilloscope
+tab1.layout.addWidget(plot_widget) # Ajoute le widget de tracé à la disposition de l'onglet
 
-# Ajout des labels
-plot_widget.setLabel('left', 'Membrane potential v')
-plot_widget.setLabel('bottom', 'Time (ms)')
+# Graphique du potentiel membranaire
+plot_widget.setTitle("Matrice d'oscilloscope") # Ajoute un titre au graphique
+time, voltage, spikes = run_neuron_simulation() # Lance la simulation neuronale et récupère les données
+plot_widget.plot(time, voltage, pen='b') # Trace le potentiel membranaire
 
-# Ajout d'un quadrillage
-plot_widget.showGrid(x=True, y=True, alpha=0.3)  # Affiche la grille sur les axes X et Y avec une transparence de 30%
+# Configuration des axes
+plot_widget.setXRange(0, max(time) if len(time) > 0 else 50)# Définit les limites de l'axe des x
+plot_widget.setLabel('left', 'Potentiel membranaire v') # Étiquette de l'axe y
+plot_widget.setLabel('bottom', 'Temps (ms)') # Étiquette de l'axe x
+plot_widget.showGrid(x=True, y=True, alpha=0.2)  # Affiche la grille
 
-# Onglet pour les Spikes (vous pouvez étendre avec votre propre code)
-tab2 = QWidget()
-tab_widget.addTab(tab2, "Spikes")
+# Création et configuration d'un scatter plot pour les spikes
+scatter_widget = pg.PlotWidget() # Crée un deuxième widget de tracé
+tab1.layout.addWidget(scatter_widget)# Ajoute ce widget à la disposition de l'onglet
+scatter_widget.setTitle("Scatter Plot des Spikes") # Ajoute un titre au scatter plot
+scatter_widget.setXRange(0, max(time) if len(time) > 0 else 50)# Définit les limites de l'axe des x
+scatter_widget.setLabel('left', 'Spikes')# Étiquette de l'axe y
+scatter_widget.setLabel('bottom', 'Temps (ms)') # Étiquette de l'axe x
+if len(spikes) > 0:
+    scatter_widget.plot(spikes, np.ones_like(spikes) * 1, pen=None, symbol='o', symbolSize=5, symbolBrush='r')# Trace les spikes
 
-# Affichage de la fenêtre
-window.show()
-app.exec_()
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+#Second onglet :
+tab2 = QWidget()# Crée un widget pour le second onglet
+tab_widget.addTab(tab2, "Spikes")# Ajoute le deuxième onglet à la barre d'onglets
+
+# Affichage de la fenêtre principale et démarrage de l'application
+window.show() # Affiche la fenêtre principale
+app.exec_()# Démarre la boucle principale de l'application
