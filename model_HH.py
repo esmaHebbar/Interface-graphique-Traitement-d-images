@@ -49,23 +49,27 @@ HH.gl = gl0
 statemon = StateMonitor(HH, True, record=True)
 
 HH.I = 0.0*uA
-run(50*ms)
-HH.I = 10.0*uA
-run(50*ms)
+run(50*ms,report='text')
+HH.I = 70.0*uA
+run(50*ms,report='text')
 HH.I = 0.0*uA
-run(50*ms)
-# HH.I = 30.0*uA
-# run(0.5*ms)
-# HH.I = 0.0*uA
-# run(9.5*ms)
+run(50*ms,report='text')
 
-figure(figsize=(18, 6), dpi=80)
+
+figure()
+subplot(2,1,1)
 plot(statemon.t/ms, statemon.v[0])
 xlabel('Time (ms)')
 ylabel('V');
+
+subplot(2,1,2)
+plot(statemon.t/ms, statemon.I[0], label='Applied Current')
+xlabel('Time (ms)')
+ylabel('uA')
+legend()
 show()
 
-figure(figsize=(18, 3), dpi=80)
+figure()
 plot(statemon.t/ms, statemon.n[0], label='n')
 plot(statemon.t/ms, statemon.m[0], label='m')
 plot(statemon.t/ms, statemon.h[0], label='h')
@@ -74,7 +78,7 @@ ylabel('Probabilty')
 legend()
 show()
 
-figure(figsize=(18, 3), dpi=80)
+figure()
 plot(statemon.t/ms, statemon.gNa[0]*(statemon.m[0]**3)*statemon.h[0], label='Na')
 plot(statemon.t/ms, statemon.gK[0]*(statemon.n[0]**4), label='K')
 xlabel('Time (ms)')
@@ -82,20 +86,12 @@ ylabel('Conductances (mS)')
 legend()
 show()
 
-figure(figsize=(18, 3), dpi=80)
+figure()
 plot(statemon.t/ms, statemon.gNa[0]*(statemon.m[0]**3)*statemon.h[0]*(statemon.v[0]-ENa), label='I_Na')
 plot(statemon.t/ms, statemon.gK[0]*(statemon.n[0]**4)*(statemon.v[0]-EK), label='I_K')
 plot(statemon.t/ms, statemon.gl[0]*(statemon.v[0]-El) + statemon.gK[0]*(statemon.n[0]**4)*(statemon.v[0]-EK) +
      statemon.gNa[0]*(statemon.m[0]**3)*statemon.h[0]*(statemon.v[0]-ENa), label='I_Na + I_K + I_l')
 xlabel('Time (ms)')
 ylabel('Currents (uA)')
-legend()
-show()
-
-
-figure(figsize=(18, 3), dpi=80)
-plot(statemon.t/ms, statemon.I[0], label='Applied Current')
-xlabel('Time (ms)')
-ylabel('uA')
 legend()
 show()
