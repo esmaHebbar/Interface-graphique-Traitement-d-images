@@ -66,41 +66,49 @@ def run_neuron_simulation():
 
 # Premier onglet :
     
-tab1 = QWidget() # Crée un widget pour le premier onglet
+tab1 = QWidget() # cration d'un widget pour le premier onglet
 tab_widget.addTab(tab1, "Oscilloscope")# ajout de l'onglet à la barre d'onglets
-tab1.layout = QVBoxLayout() # Crée et définit une disposition verticale pour l'onglet
+tab1.layout = QVBoxLayout() # création et définition d'une disposition verticale pour l'onglet
 tab1.setLayout(tab1.layout)
 
+#Premier widget :
 plot_widget = pg.PlotWidget()# Crée un widget de tracé pour l'oscilloscope
-tab1.layout.addWidget(plot_widget) # Ajoute le widget de tracé à la disposition de l'onglet
+tab1.layout.addWidget(plot_widget) # Ajoute le widget de tracé à l'onglet 1 (tab1)
 
 # Graphique du potentiel membranaire
-plot_widget.setTitle("Matrice d'oscilloscope") # Ajoute un titre au graphique
 time, voltage, spikes = run_neuron_simulation() # Lance la simulation neuronale et récupère les données
-plot_widget.plot(time, voltage, pen='b') # Trace le potentiel membranaire
+plot_widget.plot(time, voltage, pen='b') # Trace le potentiel membranaire en bleu ('b')
 
 # Configuration des axes
-plot_widget.setXRange(0, max(time) if len(time) > 0 else 50)# Définit les limites de l'axe des x
-plot_widget.setLabel('left', 'Potentiel membranaire v') # Étiquette de l'axe y
-plot_widget.setLabel('bottom', 'Temps (ms)') # Étiquette de l'axe x
-plot_widget.showGrid(x=True, y=True, alpha=0.2)  # Affiche la grille
+plot_widget.setTitle("Matrice d'oscilloscope")
+plot_widget.setXRange(0, max(time) if len(time) > 0 else 50)
 
-# Création et configuration d'un scatter plot pour les spikes
-scatter_widget = pg.PlotWidget() # Crée un deuxième widget de tracé
-tab1.layout.addWidget(scatter_widget)# Ajoute ce widget à la disposition de l'onglet
-scatter_widget.setTitle("Scatter Plot des Spikes") # Ajoute un titre au scatter plot
-scatter_widget.setXRange(0, max(time) if len(time) > 0 else 50)# Définit les limites de l'axe des x
-scatter_widget.setLabel('left', 'Spikes')# Étiquette de l'axe y
-scatter_widget.setLabel('bottom', 'Temps (ms)') # Étiquette de l'axe x
+plot_widget.setLabel('left', 'Potentiel membranaire v') 
+plot_widget.setLabel('bottom', 'Temps (ms)') 
+plot_widget.showGrid(x=True, y=True, alpha=0.2)
+
+# Second widget :
+scatter_widget = pg.PlotWidget()
+tab1.layout.addWidget(scatter_widget)# Ajoute ce widget à l'onglet 1 (tab1)
+
+# Configuration des axes
+scatter_widget.setTitle("Scatter Plot des Spikes")
+scatter_widget.setXRange(0, max(time) if len(time) > 0 else 50)
+
+scatter_widget.setLabel('left', 'Spikes')
+scatter_widget.setLabel('bottom', 'Temps (ms)')
+
 if len(spikes) > 0:
     scatter_widget.plot(spikes, np.ones_like(spikes) * 1, pen=None, symbol='o', symbolSize=5, symbolBrush='r')# Trace les spikes
 
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 #Second onglet :
-tab2 = QWidget()# Crée un widget pour le second onglet
-tab_widget.addTab(tab2, "Spikes")# Ajoute le deuxième onglet à la barre d'onglets
+    
+tab2 = QWidget()
+tab_widget.addTab(tab2, "Spikes")
 
-# Affichage de la fenêtre principale et démarrage de l'application
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 window.show() # Affiche la fenêtre principale
 app.exec_()# Démarre la boucle principale de l'application
