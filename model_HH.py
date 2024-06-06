@@ -1,9 +1,10 @@
 from brian2 import *
-from matplotlib import *
+import matplotlib.pyplot as plt
 
-defaultclock.dt = 0.01*ms #determining step size for differential equation solver
+# Définir la taille du pas de temps pour le solveur d'équations différentielles
+defaultclock.dt = 0.01*ms
 
-start_scope()
+# Paramètres du modèle de Hodgkin-Huxley
 Cm = 1.0*ufarad
 El = 10.6*mV
 ENa = 120.0*mV
@@ -12,9 +13,10 @@ gl0 = 0.3*msiemens
 gNa0 = 120.0*msiemens
 gK0 = 36.0*msiemens
 
+# Équations différentielles pour le modèle de Hodgkin-Huxley
 eqs = '''
 dv/dt = (I - gl * (v-El) - gNa * m**3 * h * (v-ENa) - gK * n**4 * (v-EK))/Cm : volt
-I : amp (constant) # applied current
+I : amp (constant)  # Courant appliqué
 
 dn/dt = alphan * (1-n) - betan * n : 1
 dm/dt = alpham * (1-m) - betam * m : 1
@@ -34,64 +36,74 @@ gK : siemens
 gl : siemens
 '''
 
-HH = NeuronGroup(1, eqs, method='rk4')
+# Créer un groupe de neurones avec les équations définies
+HH = NeuronGroup(1, eqs, threshold='v>-20*mV', reset='v=El', refractory=5*ms,method='rk4')
 
-HH.v = 0.0*mV
-
+# Initialisation des variables
+HH.v = El
 HH.h = 0.75
 HH.m = 0.15
 HH.n = 0.35
-
 HH.gNa = gNa0
 HH.gK = gK0
 HH.gl = gl0
 
+# Enregistrer les variables d'état et les spikes
 statemon = StateMonitor(HH, True, record=True)
+spikemon = SpikeMonitor(HH)
 
+# Simulation avec différents courants appliqués
 HH.I = 0.0*uA
-run(50*ms,report='text')
-HH.I = 70.0*uA
-run(50*ms,report='text')
+run(50*ms, report='text')
+HH.I = 60.0*uA
+run(50*ms, report='text')
 HH.I = 0.0*uA
-run(50*ms,report='text')
+run(50*ms, report='text')
+
+# Traçage des résultats
+plt.figure()
+plt.subplot(2, 1, 1)
+plt.plot(statemon.t/ms, statemon.v[0])
+plt.xlabel('Time (ms)')
+plt.ylabel('V')
+
+plt.subplot(2, 1, 2)
+plt.plot(statemon.t/ms, statemon.I[0]/uA, label='Applied Current')
+plt.xlabel('Time (ms)')
+plt.ylabel('Current (uA)')
+plt.legend()
+plt.show()
+
+plt.figure()
+plt.plot(spikemon.t/ms, spikemon.i, '.k')
+plt.xlabel('Time (ms)')
+plt.ylabel('Neuron index')
+plt.show()
 
 
-figure()
-subplot(2,1,1)
-plot(statemon.t/ms, statemon.v[0])
-xlabel('Time (ms)')
-ylabel('V');
+# figure()
+# plot(statemon.t/ms, statemon.n[0], label='n')
+# plot(statemon.t/ms, statemon.m[0], label='m')
+# plot(statemon.t/ms, statemon.h[0], label='h')
+# xlabel('Time (ms)')
+# ylabel('Probabilty')
+# legend()
+# show()
 
-subplot(2,1,2)
-plot(statemon.t/ms, statemon.I[0], label='Applied Current')
-xlabel('Time (ms)')
-ylabel('uA')
-legend()
-show()
+# figure()
+# plot(statemon.t/ms, statemon.gNa[0]*(statemon.m[0]**3)*statemon.h[0], label='Na')
+# plot(statemon.t/ms, statemon.gK[0]*(statemon.n[0]**4), label='K')
+# xlabel('Time (ms)')
+# ylabel('Conductances (mS)')
+# legend()
+# show()
 
-figure()
-plot(statemon.t/ms, statemon.n[0], label='n')
-plot(statemon.t/ms, statemon.m[0], label='m')
-plot(statemon.t/ms, statemon.h[0], label='h')
-xlabel('Time (ms)')
-ylabel('Probabilty')
-legend()
-show()
-
-figure()
-plot(statemon.t/ms, statemon.gNa[0]*(statemon.m[0]**3)*statemon.h[0], label='Na')
-plot(statemon.t/ms, statemon.gK[0]*(statemon.n[0]**4), label='K')
-xlabel('Time (ms)')
-ylabel('Conductances (mS)')
-legend()
-show()
-
-figure()
-plot(statemon.t/ms, statemon.gNa[0]*(statemon.m[0]**3)*statemon.h[0]*(statemon.v[0]-ENa), label='I_Na')
-plot(statemon.t/ms, statemon.gK[0]*(statemon.n[0]**4)*(statemon.v[0]-EK), label='I_K')
-plot(statemon.t/ms, statemon.gl[0]*(statemon.v[0]-El) + statemon.gK[0]*(statemon.n[0]**4)*(statemon.v[0]-EK) +
-     statemon.gNa[0]*(statemon.m[0]**3)*statemon.h[0]*(statemon.v[0]-ENa), label='I_Na + I_K + I_l')
-xlabel('Time (ms)')
-ylabel('Currents (uA)')
-legend()
-show()
+# figure()
+# plot(statemon.t/ms, statemon.gNa[0]*(statemon.m[0]**3)*statemon.h[0]*(statemon.v[0]-ENa), label='I_Na')
+# plot(statemon.t/ms, statemon.gK[0]*(statemon.n[0]**4)*(statemon.v[0]-EK), label='I_K')
+# plot(statemon.t/ms, statemon.gl[0]*(statemon.v[0]-El) + statemon.gK[0]*(statemon.n[0]**4)*(statemon.v[0]-EK) +
+#      statemon.gNa[0]*(statemon.m[0]**3)*statemon.h[0]*(statemon.v[0]-ENa), label='I_Na + I_K + I_l')
+# xlabel('Time (ms)')
+# ylabel('Currents (uA)')
+# legend()
+# show()

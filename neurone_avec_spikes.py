@@ -21,96 +21,95 @@ window.setWindowTitle('Oscilloscope Modulaire')
 tab_widget = QTabWidget()
 window.setCentralWidget(tab_widget)
 
-data = { 'Cm' : 200/10**12,
-'gl' : 10/10**12,
-'u_rest' : -60, #El
-'th_rh' : -50, #Vt
-'Dt' : 2,
-'tau_a' : 200,#tau_w
-'Va' : -50,
-'Da' : 5,
-'ga_max' : 10/10**12,#ga_bar
-'Ea' : -70,
-'Is' : 200/10**12,
-'th' : -40, # threshold - seuil
-'u_reset' : -55,#Vr
-'b':1/10**12, #Dga 
-'R': 5*10**9,
-'step':0/10**12
-}
+defaultclock.dt = 0.01*ms
 
-# Simulation Neuronale avec Brian2
+# Paramètres du modèle de Hodgkin-Huxley
+Cm = 1.0*ufarad
+El = 10.6*mV
+ENa = 120.0*mV
+EK = -12.0*mV
+gl0 = 0.3*msiemens
+gNa0 = 120.0*msiemens
+gK0 = 36.0*msiemens
 
-N = 5000
-Vr = 10*mV
-theta = 20*mV
-tau = 20*ms
-delta = 2*ms
-taurefr = 2*ms
-duration = .1*second
-C = 1000
-sparseness = float(C)/N
-J = .1*mV
-muext = 25*mV
-sigmaext = 1*mV
+# Équations différentielles pour le modèle de Hodgkin-Huxley
+eqs = '''
+dv/dt = (I - gl * (v-El) - gNa * m**3 * h * (v-ENa) - gK * n**4 * (v-EK))/Cm : volt
+I : amp (constant)  # Courant appliqué
 
-eqs = """
-dV/dt = (-V+muext + sigmaext * sqrt(tau) * xi)/tau : volt
-"""
+dn/dt = alphan * (1-n) - betan * n : 1
+dm/dt = alpham * (1-m) - betam * m : 1
+dh/dt = alphah * (1-h) - betah * h : 1
 
-group = NeuronGroup(N, eqs, threshold='V>theta',
-                    reset='V=Vr', refractory=taurefr, method='euler')
-group.V = Vr
-conn = Synapses(group, group, on_pre='V += -J', delay=delta)
-conn.connect(p=sparseness)
-M = SpikeMonitor(group)
-LFP = PopulationRateMonitor(group)
+alphan = (0.01/mV) * 10*mV/exprel((-v+10*mV)/(10*mV))/ms : Hz
+betan = 0.125*exp(-v/(80*mV))/ms : Hz
 
-run(duration)
+alpham = (0.1/mV) * 10*mV/exprel((-v+25*mV)/(10*mV))/ms : Hz
+betam = 4 * exp(-v/(18*mV))/ms : Hz
 
-subplot(211)
-plot(M.t/ms, M.i, '.')
-xlim(0, duration/ms)
+alphah = 0.07 * exp(-v/(20*mV))/ms : Hz
+betah = 1/(exp((-v+30*mV) / (10*mV)) + 1)/ms : Hz
 
-subplot(212)
-plot(LFP.t/ms, LFP.smooth_rate(window='flat', width=0.5*ms)/Hz)
-xlim(0, duration/ms)
+gNa : siemens
+gK : siemens
+gl : siemens
+'''
 
-show()
+# Créer un groupe de neurones avec les équations définies
+HH = NeuronGroup(10, eqs, threshold='v>-20*mV', reset='v=0*mV', refractory=5*ms, method='rk4')
+#reset='v=El'
+# Initialisation des variables
+HH.v = El
+HH.h = 0.75
+HH.m = 0.15
+HH.n = 0.35
+HH.gNa = gNa0
+HH.gK = gK0
+HH.gl = gl0
 
-# # Onglet pour l'oscilloscope
-# tab1 = QWidget()
-# tab_widget.addTab(tab1, "Oscilloscope")
-# tab1.layout = QVBoxLayout()
-# tab1.setLayout(tab1.layout)
-# plot1_widget = pg.PlotWidget()
-# tab1.layout.addWidget(plot1_widget)
+# Enregistrer les variables d'état et les spikes
+statemon = StateMonitor(HH, True, record=True)
+spikemon = SpikeMonitor(HH)
 
-# plot1_widget.plot(LFP.t/ms, LFP.smooth_rate(window='flat', width=0.5*ms)/Hz,pen='k')  # Affichage du résultat de la simulation
-# #plot1_widget.plot(G.v0, M.count, pen='k')  # Affichage du résultat de la simulation
+# Simulation avec différents courants appliqués
+HH.I = 0.0*uA
+run(50*ms, report='text')
+HH.I = 60.0*uA
+run(50*ms, report='text')
+HH.I = 0.0*uA
+run(50*ms, report='text')
 
-# # Ajout des labels
-# plot1_widget.setLabel('left', 'Membrane potential (mV)')
-# plot1_widget.setLabel('bottom', 'Time (ms)')
+# Onglet pour l'oscilloscope
+tab1 = QWidget()
+tab_widget.addTab(tab1, "Oscilloscope")
+tab1.layout = QVBoxLayout()
+tab1.setLayout(tab1.layout)
+plot1_widget = pg.PlotWidget()
+tab1.layout.addWidget(plot1_widget)
+plot1_widget.plot(statemon.t/ms, statemon.v[0], pen='k')  # Affichage du résultat de la simulation
 
-# # Ajout d'un quadrillage
-# plot1_widget.showGrid(x=True, y=True, alpha=0.3)  # Affiche la grille sur les axes X et Y avec une transparence de 30%
+# Ajout des labels
+plot1_widget.setLabel('left', 'Membrane potential (mV)')
+plot1_widget.setLabel('bottom', 'Time (ms)')
 
-# # Onglet pour les Spikes
-# tab2 = QWidget()
-# tab_widget.addTab(tab2, "Spikes")
-# tab2.layout = QVBoxLayout()
-# tab2.setLayout(tab2.layout)
-# plot2_widget = pg.PlotWidget()
-# tab2.layout.addWidget(plot2_widget)
+# Ajout d'un quadrillage
+plot1_widget.showGrid(x=True, y=True, alpha=0.3)  # Affiche la grille sur les axes X et Y avec une transparence de 30%
 
-# # Affichage des spikes
-# plot2_widget.plot(M.t/ms, M.i, pen='.b')
+# Onglet pour les Spikes
+tab2 = QWidget()
+tab_widget.addTab(tab2, "Spikes")
+tab2.layout = QVBoxLayout()
+tab2.setLayout(tab2.layout)
+plot2_widget = pg.PlotWidget()
+tab2.layout.addWidget(plot2_widget)
 
-# # Ajout des labels pour le graphique des spikes
-# plot2_widget.setLabel('left', 'Neuron index')
-# plot2_widget.setLabel('bottom', 'Time (ms)')
+# Affichage des spikes
+plot2_widget.plot(spikemon.t/ms, np.array(spikemon.i), pen=None, symbol='o')
 
-# # Affichage de la fenêtre
-# window.show()
-# app.exec_()
+# Ajout des labels pour le graphique des spikes
+plot2_widget.setLabel('left', 'Neuron index')
+plot2_widget.setLabel('bottom', 'Time (ms)')
+
+# Affichage de la fenêtre
+window.show()
+app.exec_()
