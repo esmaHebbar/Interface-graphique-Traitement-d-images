@@ -136,7 +136,7 @@ tab1.layout.addWidget(plot_widget) # Ajoute le widget de tracé à l'onglet 1 (t
 plot1_widget = pg.PlotWidget()
 tab1.layout.addWidget(plot1_widget)
 plot1_widget.plot(statemon.t/ms, statemon.v[0], pen='k')  # Affichage du résultat de la simulation HH
-plot1_widget.setLabel('left', 'Membrane potential (mV)')
+plot1_widget.setLabel('left', 'Membrane potential (V)')
 plot1_widget.setLabel('bottom', 'Time (ms)')
 plot1_widget.showGrid(x=True, y=True, alpha=0.2)
 #fin HH
