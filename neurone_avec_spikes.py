@@ -25,7 +25,8 @@ defaultclock.dt = 0.01*ms
 
 # Paramètres du modèle de Hodgkin-Huxley
 Cm = 1.0*ufarad
-El = 10.6*mV
+#El = 10.6*mV
+El = 0*mV
 ENa = 120.0*mV
 EK = -12.0*mV
 gl0 = 0.3*msiemens
@@ -64,18 +65,20 @@ HH.v = El
 HH.h = 0.75
 HH.m = 0.15
 HH.n = 0.35
+
 HH.gNa = gNa0
 HH.gK = gK0
 HH.gl = gl0
 
+
 # Enregistrer les variables d'état et les spikes
-statemon = StateMonitor(HH, True, record=True)
+statemon = StateMonitor(HH,True, record=True)
 spikemon = SpikeMonitor(HH)
 
 # Simulation avec différents courants appliqués
 HH.I = 0.0*uA
 run(50*ms, report='text')
-HH.I = 60.0*uA
+HH.I = 30.0*uA
 run(50*ms, report='text')
 HH.I = 0.0*uA
 run(50*ms, report='text')
@@ -101,8 +104,6 @@ plot3_widget.plot(statemon.t/ms, statemon.I[0]/uA, label='Applied Current',pen='
 # Ajout des labels
 plot3_widget.setLabel('left', 'Currents (uA)')
 plot3_widget.setLabel('bottom', 'Time (ms)')
-
-
 
 # Ajout d'un quadrillage
 plot1_widget.showGrid(x=True, y=True, alpha=0.3)  # Affiche la grille sur les axes X et Y avec une transparence de 30%
