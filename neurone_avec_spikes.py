@@ -23,7 +23,7 @@ window.setCentralWidget(tab_widget)
 
 defaultclock.dt = 0.01*ms
 
-nb_neuron=50
+nb_neuron=10
 
 # Paramètres du modèle de Hodgkin-Huxley
 Cm = 1.0*ufarad
@@ -83,7 +83,7 @@ HH.I = 0.0*uA
 net.run(50*ms, report='text')
 
 # Définir des courants aléatoires proches de 60 µA pour chaque neurone
-HH.I = np.random.normal(60, 15, nb_neuron) * uA
+HH.I = np.random.normal(60, 5, nb_neuron) * uA
 net.run(50*ms, report='text')
 
 HH.I = 0.0*uA
@@ -97,7 +97,9 @@ tab1.setLayout(tab1.layout)
 plot1_widget = pg.PlotWidget()
 tab1.layout.addWidget(plot1_widget)
 # Affichage du résultat de la simulation
-plot1_widget.plot(statemon.t/ms, statemon.v[0], pen='k')
+#plot1_widget.plot(statemon.t/ms, statemon.v[0], pen='k')
+for i in range(nb_neuron):
+    plot1_widget.plot(statemon.t/ms, statemon.v[i], pen=(i, nb_neuron))
 # Ajout des labels
 plot1_widget.setLabel('left', 'Membrane potential (V)')
 plot1_widget.setLabel('bottom', 'Time (ms)')
