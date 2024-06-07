@@ -56,8 +56,9 @@ gl : siemens
 '''
 
 # Créer un groupe de neurones avec les équations définies
-HH = NeuronGroup(10, eqs, threshold='v>-20*mV', reset='v=0*mV', refractory=5*ms, method='rk4')
+#HH = NeuronGroup(10, eqs, threshold='v>-20*mV', reset='v=20*mV', refractory=5*ms, method='rk4')
 #reset='v=El'
+HH = NeuronGroup(10, eqs, threshold='v>20*mV',refractory=5*ms,method='rk4')
 # Initialisation des variables
 HH.v = El
 HH.h = 0.75
@@ -86,11 +87,22 @@ tab1.layout = QVBoxLayout()
 tab1.setLayout(tab1.layout)
 plot1_widget = pg.PlotWidget()
 tab1.layout.addWidget(plot1_widget)
-plot1_widget.plot(statemon.t/ms, statemon.v[0], pen='k')  # Affichage du résultat de la simulation
-
+# Affichage du résultat de la simulation
+plot1_widget.plot(statemon.t/ms, statemon.v[0], pen='k')
 # Ajout des labels
-plot1_widget.setLabel('left', 'Membrane potential (mV)')
+plot1_widget.setLabel('left', 'Membrane potential (V)')
 plot1_widget.setLabel('bottom', 'Time (ms)')
+
+plot3_widget = pg.PlotWidget()
+tab1.layout.addWidget(plot3_widget)
+# Affichage du résultat de la simulation
+# Affichage du résultat de la stimulation
+plot3_widget.plot(statemon.t/ms, statemon.I[0]/uA, label='Applied Current',pen='r')
+# Ajout des labels
+plot3_widget.setLabel('left', 'Currents (uA)')
+plot3_widget.setLabel('bottom', 'Time (ms)')
+
+
 
 # Ajout d'un quadrillage
 plot1_widget.showGrid(x=True, y=True, alpha=0.3)  # Affiche la grille sur les axes X et Y avec une transparence de 30%
@@ -106,7 +118,7 @@ tab2.layout.addWidget(plot2_widget)
 # Affichage des spikes
 plot2_widget.plot(spikemon.t/ms, np.array(spikemon.i), pen=None, symbol='o')
 
-# Ajout des labels pour le graphique des spikes
+# # Ajout des labels pour le graphique des spikes
 plot2_widget.setLabel('left', 'Neuron index')
 plot2_widget.setLabel('bottom', 'Time (ms)')
 
