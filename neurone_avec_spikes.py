@@ -10,7 +10,7 @@ from brian2 import *
 
 # Configure the appearance of pyqtgraph
 pg.setConfigOption('background', 'w')
-pg.setConfigOption('foreground', 'k') 
+pg.setConfigOption('foreground', 'k')
 
 # Création de l'application et de la fenêtre principale
 app = QApplication([])
@@ -23,9 +23,10 @@ window.setCentralWidget(tab_widget)
 
 defaultclock.dt = 0.01*ms
 
+nb_neuron=50
+
 # Paramètres du modèle de Hodgkin-Huxley
 Cm = 1.0*ufarad
-#El = 10.6*mV
 El = 0*mV
 ENa = 120.0*mV
 EK = -12.0*mV
@@ -57,9 +58,8 @@ gl : siemens
 '''
 
 # Créer un groupe de neurones avec les équations définies
-#HH = NeuronGroup(10, eqs, threshold='v>-20*mV', reset='v=20*mV', refractory=5*ms, method='rk4')
-#reset='v=El'
-HH = NeuronGroup(10, eqs, threshold='v>20*mV',refractory=5*ms,method='rk4')
+HH = NeuronGroup(nb_neuron, eqs, threshold='v>20*mV', refractory=3*ms, method='rk4')
+
 # Initialisation des variables
 HH.v = El
 HH.h = 0.75
@@ -70,18 +70,24 @@ HH.gNa = gNa0
 HH.gK = gK0
 HH.gl = gl0
 
-
 # Enregistrer les variables d'état et les spikes
-statemon = StateMonitor(HH,True, record=True)
+statemon = StateMonitor(HH, True, record=True)
+I_monitor = StateMonitor(HH, 'I', record=True)
 spikemon = SpikeMonitor(HH)
+
+# Créer explicitement un objet Network et y ajouter les objets de simulation
+net = Network(HH, statemon, spikemon, I_monitor)  # Ajout de I_monitor au réseau
 
 # Simulation avec différents courants appliqués
 HH.I = 0.0*uA
-run(50*ms, report='text')
-HH.I = 30.0*uA
-run(50*ms, report='text')
+net.run(50*ms, report='text')
+
+# Définir des courants aléatoires proches de 60 µA pour chaque neurone
+HH.I = np.random.normal(60, 15, nb_neuron) * uA
+net.run(50*ms, report='text')
+
 HH.I = 0.0*uA
-run(50*ms, report='text')
+net.run(50*ms, report='text')
 
 # Onglet pour l'oscilloscope
 tab1 = QWidget()
@@ -98,9 +104,10 @@ plot1_widget.setLabel('bottom', 'Time (ms)')
 
 plot3_widget = pg.PlotWidget()
 tab1.layout.addWidget(plot3_widget)
-# Affichage du résultat de la simulation
 # Affichage du résultat de la stimulation
-plot3_widget.plot(statemon.t/ms, statemon.I[0]/uA, label='Applied Current',pen='r')
+#plot3_widget.plot(statemon.t/ms, statemon.I[0]/uA, label='Applied Current', pen='r')
+for i in range(nb_neuron):
+    plot3_widget.plot(I_monitor.t/ms, I_monitor.I[i]/uA, pen=(i, nb_neuron))
 # Ajout des labels
 plot3_widget.setLabel('left', 'Currents (uA)')
 plot3_widget.setLabel('bottom', 'Time (ms)')
@@ -119,7 +126,7 @@ tab2.layout.addWidget(plot2_widget)
 # Affichage des spikes
 plot2_widget.plot(spikemon.t/ms, np.array(spikemon.i), pen=None, symbol='o')
 
-# # Ajout des labels pour le graphique des spikes
+# Ajout des labels pour le graphique des spikes
 plot2_widget.setLabel('left', 'Neuron index')
 plot2_widget.setLabel('bottom', 'Time (ms)')
 
