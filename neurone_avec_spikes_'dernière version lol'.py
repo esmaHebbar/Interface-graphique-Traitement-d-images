@@ -8,15 +8,17 @@ import pyqtgraph as pg
 from PyQt5.QtWidgets import QApplication, QMainWindow, QTabWidget, QWidget, QVBoxLayout
 from PyQt5.QtCore import pyqtSignal
 from brian2 import *
+import matplotlib.pyplot as plot
+
 
 # Configure the appearance of pyqtgraph
 pg.setConfigOption('background', 'w')
-pg.setConfigOption('foreground', 'k') 
+
 
 # Application and main window creation
 app = QApplication([])
 window = QMainWindow()
-window.setWindowTitle('Oscilloscope Modulaire')
+window.setWindowTitle('Interface graphique modulaire')
 
 # Tab configurations
 tab_widget = QTabWidget()
@@ -68,6 +70,7 @@ HH.gl = gl0
 
 # Monitoring state variables and spikes
 statemon = StateMonitor(HH, True, record=True)
+I_monitor = StateMonitor(HH, 'I', record=True)
 spikemon = SpikeMonitor(HH)
 
 # Running simulations with different applied currents
@@ -95,6 +98,10 @@ class InteractivePlotWidget(pg.PlotWidget):
             else:
                 self.pointClicked.emit(None)
         super().mousePressEvent(event)
+        
+# Génération de couleurs
+num_neurons = len(HH)
+colors = [pg.intColor(i, hues=num_neurons) for i in range(num_neurons)]
 
 # Oscilloscope tab
 tab1 = QWidget()
@@ -104,24 +111,28 @@ tab1.setLayout(tab1.layout)
 plot1_widget = pg.PlotWidget()
 tab1.layout.addWidget(plot1_widget)
 plot1_widget.plot(statemon.t/ms, statemon.v[0], pen='k')
-plot1_widget.setLabel('left', 'Membrane potential (V)')
+plot1_widget.setLabel('left', 'Mambrane voltage (V)')
 plot1_widget.setLabel('bottom', 'Time (ms)')
+
+
 plot3_widget = pg.PlotWidget()
 tab1.layout.addWidget(plot3_widget)
 plot3_widget.plot(statemon.t/ms, statemon.I[0]/uA, pen='r')
-plot3_widget.setLabel('left', 'Currents (uA)')
-plot3_widget.setLabel('bottom', 'Time (ms)')
+plot3_widget.setLabel('left', 'Courant d\'entrée (uA)')
+plot3_widget.setLabel('bottom', 'Temps (ms)')
 plot1_widget.showGrid(x=True, y=True, alpha=0.3)
 
-# Spikes tab
+# Onglet rasterplot
 tab2 = QWidget()
-tab_widget.addTab(tab2, "Spikes")
+tab_widget.addTab(tab2, "Rasterplot")
 tab2.layout = QVBoxLayout()
 tab2.setLayout(tab2.layout)
 plot2_widget = InteractivePlotWidget()
 tab2.layout.addWidget(plot2_widget)
 scatter = pg.ScatterPlotItem(pen=None, symbol='o')
 plot2_widget.addItem(scatter)
+
+
 scatter.setData(spikemon.t/ms, np.array(spikemon.i))
 plot2_widget.scatter = scatter
 plot2_widget.setLabel('left', 'Neuron index')
@@ -130,6 +141,16 @@ details_layout = QVBoxLayout()
 tab2.layout.addLayout(details_layout)
 details_plot = pg.PlotWidget()
 details_layout.addWidget(details_plot)
+
+# Tracé des spikes avec des couleurs différentes
+for i in range(num_neurons):
+    times = spikemon.t[spikemon.i == i] / ms
+    scatter.addPoints(x=times, y=np.full(times.shape, i), brush=colors[i], size=5)
+
+plot2_widget.scatter = scatter
+plot2_widget.setLabel('left', 'Neuron index')
+plot2_widget.setLabel('bottom', 'Time (ms)')
+
 
 def on_point_clicked(data):
     if data is None:
@@ -145,6 +166,7 @@ def on_point_clicked(data):
 
 
 plot2_widget.pointClicked.connect(on_point_clicked)
+
 
 # Display the window
 window.show()
