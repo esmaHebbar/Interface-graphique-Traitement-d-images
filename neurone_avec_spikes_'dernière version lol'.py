@@ -8,17 +8,15 @@ import pyqtgraph as pg
 from PyQt5.QtWidgets import QApplication, QMainWindow, QTabWidget, QWidget, QVBoxLayout
 from PyQt5.QtCore import pyqtSignal
 from brian2 import *
-import matplotlib.pyplot as plot
-
 
 # Configure the appearance of pyqtgraph
 pg.setConfigOption('background', 'w')
-
+pg.setConfigOption('foreground', 'k') 
 
 # Application and main window creation
 app = QApplication([])
 window = QMainWindow()
-window.setWindowTitle('Interface graphique modulaire')
+window.setWindowTitle('Oscilloscope Modulaire')
 
 # Tab configurations
 tab_widget = QTabWidget()
@@ -70,7 +68,6 @@ HH.gl = gl0
 
 # Monitoring state variables and spikes
 statemon = StateMonitor(HH, True, record=True)
-I_monitor = StateMonitor(HH, 'I', record=True)
 spikemon = SpikeMonitor(HH)
 
 # Running simulations with different applied currents
@@ -92,16 +89,22 @@ class InteractivePlotWidget(pg.PlotWidget):
     def mousePressEvent(self, event):
         if self.scatter:
             pos = self.plotItem.vb.mapSceneToView(event.pos())
+            print(f"Position du clic : {pos}")
             points = self.scatter.pointsAt(pos)
+            print(f"Points trouvés : {points}")
+            print(points)
+            
             if points:  
+                # Print details about the SpotItem
+                for point in points:
+                    print(f"Point details: {point.data()}, pos: {point.pos()}, index: {point.index()}")
+                
                 self.pointClicked.emit(points[0].data())
+                print(f"Point cliquéw : {points[0].data()}")
             else:
                 self.pointClicked.emit(None)
+                print("Aucun point cliqué")
         super().mousePressEvent(event)
-        
-# Génération de couleurs
-num_neurons = len(HH)
-colors = [pg.intColor(i, hues=num_neurons) for i in range(num_neurons)]
 
 # Oscilloscope tab
 tab1 = QWidget()
@@ -111,29 +114,31 @@ tab1.setLayout(tab1.layout)
 plot1_widget = pg.PlotWidget()
 tab1.layout.addWidget(plot1_widget)
 plot1_widget.plot(statemon.t/ms, statemon.v[0], pen='k')
-plot1_widget.setLabel('left', 'Mambrane voltage (V)')
+plot1_widget.setLabel('left', 'Membrane potential (V)')
 plot1_widget.setLabel('bottom', 'Time (ms)')
-
-
 plot3_widget = pg.PlotWidget()
 tab1.layout.addWidget(plot3_widget)
 plot3_widget.plot(statemon.t/ms, statemon.I[0]/uA, pen='r')
-plot3_widget.setLabel('left', 'Courant d\'entrée (uA)')
-plot3_widget.setLabel('bottom', 'Temps (ms)')
+plot3_widget.setLabel('left', 'Currents (uA)')
+plot3_widget.setLabel('bottom', 'Time (ms)')
 plot1_widget.showGrid(x=True, y=True, alpha=0.3)
 
-# Onglet rasterplot
+# Spikes tab
 tab2 = QWidget()
-tab_widget.addTab(tab2, "Rasterplot")
+tab_widget.addTab(tab2, "Spikes")
 tab2.layout = QVBoxLayout()
 tab2.setLayout(tab2.layout)
 plot2_widget = InteractivePlotWidget()
 tab2.layout.addWidget(plot2_widget)
+
+spike_data = [{'pos': (t/ms, i), 'data': (t/ms, i)} for t, i in zip(spikemon.t, spikemon.i)]
 scatter = pg.ScatterPlotItem(pen=None, symbol='o')
 plot2_widget.addItem(scatter)
+scatter.addPoints(spike_data)
+plot2_widget.scatter = scatter
 
 
-scatter.setData(spikemon.t/ms, np.array(spikemon.i))
+# scatter.setData(spikemon.t/ms, np.array(spikemon.i))
 plot2_widget.scatter = scatter
 plot2_widget.setLabel('left', 'Neuron index')
 plot2_widget.setLabel('bottom', 'Time (ms)')
@@ -142,32 +147,23 @@ tab2.layout.addLayout(details_layout)
 details_plot = pg.PlotWidget()
 details_layout.addWidget(details_plot)
 
-# Tracé des spikes avec des couleurs différentes
-for i in range(num_neurons):
-    times = spikemon.t[spikemon.i == i] / ms
-    scatter.addPoints(x=times, y=np.full(times.shape, i), brush=colors[i], size=5)
-
-plot2_widget.scatter = scatter
-plot2_widget.setLabel('left', 'Neuron index')
-plot2_widget.setLabel('bottom', 'Time (ms)')
-
-
 def on_point_clicked(data):
+    print('DATATATATATATATATATA',data)
     if data is None:
-        print("No data point was clicked.")
+        print("Aucun point de données n'a été cliqué oupsi hihi.")
         return
     
     neuron_index = data[1]
+    print('Neuron_index : ',neuron_index)
     times = spikemon.t[spikemon.i == neuron_index]/ms
     details_plot.clear()
     details_plot.plot(times, np.ones_like(times), pen=None, symbol='t')
     details_plot.setLabel('bottom', 'Time (ms)')
     details_plot.setLabel('left', 'Spike Marker')
+    print(f"Point cliqué : neurone index {neuron_index}, temps des pics {times}")
 
 
 plot2_widget.pointClicked.connect(on_point_clicked)
 
-
-# Display the window
 window.show()
 app.exec_()
