@@ -5,7 +5,7 @@ Created on Wed Jun  5 10:29:16 2024
 """
 import numpy as np
 import pyqtgraph as pg
-from PyQt5.QtWidgets import QApplication, QMainWindow, QTabWidget, QWidget, QVBoxLayout
+from PyQt5.QtWidgets import QApplication, QMainWindow, QTabWidget, QWidget, QVBoxLayout, QTextEdit
 from PyQt5.QtCore import pyqtSignal
 from brian2 import *
 
@@ -89,21 +89,21 @@ class InteractivePlotWidget(pg.PlotWidget):
     def mousePressEvent(self, event):
         if self.scatter:
             pos = self.plotItem.vb.mapSceneToView(event.pos())
-            print(f"Position du clic : {pos}")
+            # print(f"Position du clic : {pos}")
             points = self.scatter.pointsAt(pos)
-            print(f"Points trouvés : {points}")
-            print(points)
+            # print(f"Points trouvés : {points}")
+            # print(points)
             
             if points:  
-                # Print details about the SpotItem
-                for point in points:
-                    print(f"Point details: {point.data()}, pos: {point.pos()}, index: {point.index()}")
+            
+                # for point in points:
+                #     print(f"Point details: {point.data()}, pos: {point.pos()}, index: {point.index()}")
                 
                 self.pointClicked.emit(points[0].data())
-                print(f"Point cliquéw : {points[0].data()}")
+                # print(f"Point cliqué : {points[0].data()}")
             else:
                 self.pointClicked.emit(None)
-                print("Aucun point cliqué")
+                # print("Aucun point cliqué..")
         super().mousePressEvent(event)
 
 # Oscilloscope tab
@@ -125,7 +125,7 @@ plot1_widget.showGrid(x=True, y=True, alpha=0.3)
 
 # Spikes tab
 tab2 = QWidget()
-tab_widget.addTab(tab2, "Spikes")
+tab_widget.addTab(tab2, "Rasterplot")
 tab2.layout = QVBoxLayout()
 tab2.setLayout(tab2.layout)
 plot2_widget = InteractivePlotWidget()
@@ -137,9 +137,11 @@ plot2_widget.addItem(scatter)
 scatter.addPoints(spike_data)
 plot2_widget.scatter = scatter
 
+# Ajout d'un QTextEdit pour afficher les messages de débogage
+descriptive_data = QTextEdit()
+descriptive_data.setReadOnly(True)
+tab2.layout.addWidget(descriptive_data)
 
-# scatter.setData(spikemon.t/ms, np.array(spikemon.i))
-plot2_widget.scatter = scatter
 plot2_widget.setLabel('left', 'Neuron index')
 plot2_widget.setLabel('bottom', 'Time (ms)')
 details_layout = QVBoxLayout()
@@ -148,20 +150,31 @@ details_plot = pg.PlotWidget()
 details_layout.addWidget(details_plot)
 
 def on_point_clicked(data):
-    print('DATATATATATATATATATA',data)
+    message = f'-------------------------------------------------------------------------------------------------------------\n'
+    descriptive_data.append(message)
+    message = f'Données sur le point cliqué : \n'
+    descriptive_data.append(message)
+    
     if data is None:
-        print("Aucun point de données n'a été cliqué oupsi hihi.")
+        descriptive_data.append("Aucun point de données n'a été cliqué.\n")
         return
     
     neuron_index = data[1]
-    print('Neuron_index : ',neuron_index)
+    message = f'        Neuron index : {neuron_index}\n'
+    descriptive_data.append(message)
+    
     times = spikemon.t[spikemon.i == neuron_index]/ms
     details_plot.clear()
     details_plot.plot(times, np.ones_like(times), pen=None, symbol='t')
     details_plot.setLabel('bottom', 'Time (ms)')
     details_plot.setLabel('left', 'Spike Marker')
-    print(f"Point cliqué : neurone index {neuron_index}, temps des pics {times}")
-
+    
+    # message = f"Spikes détectés aux instants : {times}\n"
+    # descriptive_data.append(message)
+    
+    for i in range (len(times)) :
+        message = f"        Spike n°{i+1} détecté à l'instant : {times[i]} ms\n"
+        descriptive_data.append(message)
 
 plot2_widget.pointClicked.connect(on_point_clicked)
 
