@@ -11,6 +11,10 @@ from PyQt5.QtCore import pyqtSignal
 from brian2 import *
 import random
 
+from model_HH import Calculer
+
+nb_neuron,statemon,I_monitor ,spikemon= Calculer()
+
 
 # Configure the appearance of pyqtgraph
 pg.setConfigOption('background', 'w')
@@ -26,59 +30,59 @@ window.setCentralWidget(tab_widget)
 
 defaultclock.dt = 0.01*ms
 
-# Hodgkin-Huxley model parameters
-Cm = 1.0*ufarad
-El = 0*mV
-ENa = 120.0*mV
-EK = -12.0*mV
-gl0 = 0.3*msiemens
-gNa0 = 120.0*msiemens
-gK0 = 36.0*msiemens
+# # Hodgkin-Huxley model parameters
+# Cm = 1.0*ufarad
+# El = 0*mV
+# ENa = 120.0*mV
+# EK = -12.0*mV
+# gl0 = 0.3*msiemens
+# gNa0 = 120.0*msiemens
+# gK0 = 36.0*msiemens
 
-# Differential equations for the Hodgkin-Huxley model
-eqs = '''
-dv/dt = (I - gl * (v-El) - gNa * m**3 * h * (v-ENa) - gK * n**4 * (v-EK))/Cm : volt
-I : amp (constant)  # Applied current
+# # Differential equations for the Hodgkin-Huxley model
+# eqs = '''
+# dv/dt = (I - gl * (v-El) - gNa * m**3 * h * (v-ENa) - gK * n**4 * (v-EK))/Cm : volt
+# I : amp (constant)  # Applied current
 
-dn/dt = alphan * (1-n) - betan * n : 1
-dm/dt = alpham * (1-m) - betam * m : 1
-dh/dt = alphah * (1-h) - betah * h : 1
+# dn/dt = alphan * (1-n) - betan * n : 1
+# dm/dt = alpham * (1-m) - betam * m : 1
+# dh/dt = alphah * (1-h) - betah * h : 1
 
-alphan = (0.01/mV) * 10*mV/exprel((-v+10*mV)/(10*mV))/ms : Hz
-betan = 0.125*exp(-v/(80*mV))/ms : Hz
+# alphan = (0.01/mV) * 10*mV/exprel((-v+10*mV)/(10*mV))/ms : Hz
+# betan = 0.125*exp(-v/(80*mV))/ms : Hz
 
-alpham = (0.1/mV) * 10*mV/exprel((-v+25*mV)/(10*mV))/ms : Hz
-betam = 4 * exp(-v/(18*mV))/ms : Hz
+# alpham = (0.1/mV) * 10*mV/exprel((-v+25*mV)/(10*mV))/ms : Hz
+# betam = 4 * exp(-v/(18*mV))/ms : Hz
 
-alphah = 0.07 * exp(-v/(20*mV))/ms : Hz
-betah = 1/(exp((-v+30*mV) / (10*mV)) + 1)/ms : Hz
+# alphah = 0.07 * exp(-v/(20*mV))/ms : Hz
+# betah = 1/(exp((-v+30*mV) / (10*mV)) + 1)/ms : Hz
 
-gNa : siemens
-gK : siemens
-gl : siemens
-'''
+# gNa : siemens
+# gK : siemens
+# gl : siemens
+# '''
 
-# Create a neuron group with the defined equations
-HH = NeuronGroup(10, eqs, threshold='v>20*mV', refractory=5*ms, method='rk4')
-HH.v = El
-HH.h = 0.75
-HH.m = 0.15
-HH.n = 0.35
-HH.gNa = gNa0
-HH.gK = gK0
-HH.gl = gl0
+# # Create a neuron group with the defined equations
+# HH = NeuronGroup(10, eqs, threshold='v>20*mV', refractory=5*ms, method='rk4')
+# HH.v = El
+# HH.h = 0.75
+# HH.m = 0.15
+# HH.n = 0.35
+# HH.gNa = gNa0
+# HH.gK = gK0
+# HH.gl = gl0
 
-# Monitoring state variables and spikes
-statemon = StateMonitor(HH, True, record=True)
-spikemon = SpikeMonitor(HH)
+# # Monitoring state variables and spikes
+# statemon = StateMonitor(HH, True, record=True)
+# spikemon = SpikeMonitor(HH)
 
-# Running simulations with different applied currents
-HH.I = 0.0*uA
-run(50*ms, report='text')
-HH.I = 30.0*uA
-run(50*ms, report='text')
-HH.I = 0.0*uA
-run(50*ms, report='text')
+# # Running simulations with different applied currents
+# HH.I = 0.0*uA
+# run(50*ms, report='text')
+# HH.I = 30.0*uA
+# run(50*ms, report='text')
+# HH.I = 0.0*uA
+# run(50*ms, report='text')
 
 # Custom interactive plot widget class
 class InteractivePlotWidget(pg.PlotWidget):
@@ -183,7 +187,10 @@ tab1.layout = QVBoxLayout()
 tab1.setLayout(tab1.layout)
 plot1_widget = pg.PlotWidget()
 tab1.layout.addWidget(plot1_widget)
-plot1_widget.plot(statemon.t/ms, statemon.v[0], pen='k')
+# plot1_widget.plot(statemon.t/ms, statemon.v[0], pen='k')
+# Affichage du résultat de la simulation
+for i in range(nb_neuron):
+    plot1_widget.plot(statemon.t/ms, statemon.v[i], pen=(i, nb_neuron))
 plot1_widget.setLabel('left', 'Membrane potential (V)')
 plot1_widget.setLabel('bottom', 'Time (ms)')
 plot3_widget = pg.PlotWidget()
@@ -202,7 +209,7 @@ plot2_widget = InteractivePlotWidget()
 tab2.layout.addWidget(plot2_widget)
 
 # Création d'une liste de couleurs, une pour chaque neurone
-colors = [pg.mkColor((random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))) for _ in range(len(HH))]
+colors = [pg.mkColor((random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))) for _ in range(nb_neuron)]
 
 
 spike_data = []
