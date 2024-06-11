@@ -50,26 +50,6 @@ dn/dt = 0.032*(mV**-1)*5*mV/exprel((15.*mV-v+VT)/(5*mV))/ms*(1.-n)-.5*exp((10.*m
 dh/dt = 0.128*exp((17.*mV-v+VT)/(18.*mV))/ms*(1.-h)-4./(1+exp((40.*mV-v+VT)/(5.*mV)))/ms*h : 1
 I : amp
 ''')
-# group = NeuronGroup(num_neurons, eqs,
-#                 threshold='v > -40*mV',
-#                 refractory='v > -40*mV',
-#                 method='exponential_euler')
-
-# start_scope()
-# tau = 10*ms
-# eqs = '''
-# dv/dt = (1-v)/tau : 1
-# '''
-# G = NeuronGroup(1, eqs, method='exact')
-# run(100*ms)
-# plot(G.t/ms, G.v[0])
-# xlabel('Time (ms)')
-# ylabel('v');
-
-tau = 10*ms
-# eqs = '''
-# dv/dt = (2-v)/tau : 1
-# '''
 start_scope()
 
 G = NeuronGroup(1, eqs,threshold='v > -40*mV',
@@ -79,7 +59,15 @@ G = NeuronGroup(1, eqs,threshold='v > -40*mV',
 statemon = StateMonitor(G, 'v', record=0)
 spikemon = SpikeMonitor(G)
 
-run(100*ms)
+G.I = 0.0*uA
+run(50*ms, report='text')
+
+# Définir des courants aléatoires proches de 60 µA pour chaque neurone
+G.I = np.random.normal(60, 5, 1) * uA
+run(50*ms, report='text')
+
+G.I = 0.0*uA
+run(50*ms, report='text')
 
 #plot(statemon.t/ms, statemon.v[0])
 for t in spikemon.t:
