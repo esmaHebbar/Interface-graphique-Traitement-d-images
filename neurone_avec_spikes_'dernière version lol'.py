@@ -3,9 +3,10 @@
 Created on Wed Jun  5 10:29:16 2024
 @author: esma et guillaume
 """
+import sys
 import numpy as np
 import pyqtgraph as pg
-from PyQt5.QtWidgets import QApplication, QMainWindow, QTabWidget, QWidget, QVBoxLayout, QTextEdit
+from PyQt5.QtWidgets import QApplication, QMainWindow, QTabWidget, QWidget, QVBoxLayout, QTextEdit, QPushButton, QFileDialog
 from PyQt5.QtCore import pyqtSignal
 from brian2 import *
 import random
@@ -13,7 +14,6 @@ import random
 
 # Configure the appearance of pyqtgraph
 pg.setConfigOption('background', 'w')
-pg.setConfigOption('foreground', 'k') 
 
 # Application and main window creation
 app = QApplication([])
@@ -113,6 +113,70 @@ class InteractivePlotWidget(pg.PlotWidget):
                 # print("Aucun point cliqué..")
         super().mousePressEvent(event)
 
+
+
+#--------------------------------------
+# Tab 0 pour la première page
+tab0 = QWidget()
+tab_widget.addTab(tab0, "Préférences")
+tab0.layout = QVBoxLayout()
+tab0.setLayout(tab0.layout)
+
+# -----
+
+# Button 1 pour run le modèle HH
+bouton1 = QPushButton("Run le modèle HH")
+bouton1.setMaximumWidth(200) 
+tab0.layout.addWidget(bouton1)
+
+# Function pour run le modele HH
+def run_HH_model():
+    # Reinitialize the neuron group's membrane potential
+    HH.v = El  # Reset membrane potential to initial level
+    HH.h = 0.75
+    HH.m = 0.15
+    HH.n = 0.35
+    HH.I = 30.0*uA  # Apply a current
+
+    run(100*ms, report='text')  # Run the model for 100 ms
+
+    # Update the plots with the new data
+    plot1_widget.clear()
+    plot1_widget.plot(statemon.t/ms, statemon.v[0], pen='k')
+    plot3_widget.clear()
+    plot3_widget.plot(statemon.t/ms, statemon.I[0]/uA, pen='r')
+
+    print("HH model running!")
+
+# Connect the export button to the function
+bouton1.clicked.connect(run_HH_model)
+
+# -----
+
+# Button 2 pour importer des données
+bouton2 = QPushButton("Importer les données en .csv")
+bouton2.setMaximumWidth(200) 
+tab0.layout.addWidget(bouton2)
+
+# Function pour importer des données
+def import_data():
+    import csv
+    options = QFileDialog.Options()
+    fileName, _ = QFileDialog.getOpenFileName(window, "Open CSV file", "", "CSV Files (*.csv)", options=options)
+    if fileName:
+        print("Importing data from:", fileName)
+        with open(fileName, 'r') as file:
+            reader = csv.reader(file)
+            print(reader)
+            for row in reader:
+                print(row) 
+    
+    print("Data imported successfully!")
+
+# Connect the export button to the function
+bouton2.clicked.connect(import_data)
+#--------------------------------------
+
 # Oscilloscope tab
 tab1 = QWidget()
 tab_widget.addTab(tab1, "Oscilloscope")
@@ -202,6 +266,38 @@ descriptive_data.setMinimumHeight(200)
 tab2.layout.addWidget(descriptive_data)
 
 plot2_widget.pointClicked.connect(on_point_clicked)
+
+
+#--------------------------------------
+# Third tab for data export
+tab3 = QWidget()
+tab_widget.addTab(tab3, "Exporter")
+tab3.layout = QVBoxLayout()
+tab3.setLayout(tab3.layout)
+
+# Button to export data
+bouton_exporter = QPushButton("Exporter les données en .csv")
+bouton_exporter.setMaximumWidth(200) 
+tab3.layout.addWidget(bouton_exporter)
+
+# Function to export data
+def export_data():
+    import csv
+    with open('spike_data.csv', 'w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(["Time (ms)", "Neuron Index"])
+        for t, i in zip(spikemon.t/ms, spikemon.i):
+            writer.writerow([t, i])
+    print("Data exported successfully!")
+
+# Connect the export button to the function
+bouton_exporter.clicked.connect(export_data)
+
+
+
+#--------------------------------------
+
+# Show the main window and start the application
 
 window.show()
 app.exec_()
