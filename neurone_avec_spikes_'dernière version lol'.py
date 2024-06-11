@@ -8,6 +8,8 @@ import pyqtgraph as pg
 from PyQt5.QtWidgets import QApplication, QMainWindow, QTabWidget, QWidget, QVBoxLayout, QTextEdit
 from PyQt5.QtCore import pyqtSignal
 from brian2 import *
+import random
+
 
 # Configure the appearance of pyqtgraph
 pg.setConfigOption('background', 'w')
@@ -98,11 +100,16 @@ class InteractivePlotWidget(pg.PlotWidget):
             
                 # for point in points:
                 #     print(f"Point details: {point.data()}, pos: {point.pos()}, index: {point.index()}")
+                point = points[0]
+                point_data = point.data()
+                color = colors[point_data[1]]  # Récupérer la couleur en utilisant l'index du neurone
+                point_data_with_color = (point_data, color)
                 
-                self.pointClicked.emit(points[0].data())
+                # self.pointClicked.emit(points[0].data())
+                self.pointClicked.emit(point_data_with_color)
                 # print(f"Point cliqué : {points[0].data()}")
             else:
-                self.pointClicked.emit(None)
+                self.pointClicked.emit((None,None))
                 # print("Aucun point cliqué..")
         super().mousePressEvent(event)
 
@@ -131,7 +138,15 @@ tab2.setLayout(tab2.layout)
 plot2_widget = InteractivePlotWidget()
 tab2.layout.addWidget(plot2_widget)
 
-spike_data = [{'pos': (t/ms, i), 'data': (t/ms, i)} for t, i in zip(spikemon.t, spikemon.i)]
+# Création d'une liste de couleurs, une pour chaque neurone
+colors = [pg.mkColor((random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))) for _ in range(len(HH))]
+
+
+spike_data = []
+for t, i in zip(spikemon.t, spikemon.i):
+    spike_data.append({'pos': (t/ms, i), 'data': (t/ms, i), 'brush': colors[i], 'size': 5})
+
+
 scatter = pg.ScatterPlotItem(pen=None, symbol='o')
 plot2_widget.addItem(scatter)
 scatter.addPoints(spike_data)
@@ -149,15 +164,19 @@ tab2.layout.addLayout(details_layout)
 details_plot = pg.PlotWidget()
 details_layout.addWidget(details_plot)
 
-def on_point_clicked(data):
+def on_point_clicked(data_with_color):
+    if data_with_color is None:
+        descriptive_data.append("Aucun point de données n'a été cliqué.\n")
+        return
+    
+    data, color = data_with_color  # Décomposer les données reçues
+    # descriptive_data.clear()  # Clear previous messages
     message = f'-------------------------------------------------------------------------------------------------------------\n'
     descriptive_data.append(message)
     message = f'Données sur le point cliqué : \n'
     descriptive_data.append(message)
     
-    if data is None:
-        descriptive_data.append("Aucun point de données n'a été cliqué.\n")
-        return
+    
     
     neuron_index = data[1]
     message = f'        Neuron index : {neuron_index}\n'
@@ -165,7 +184,7 @@ def on_point_clicked(data):
     
     times = spikemon.t[spikemon.i == neuron_index]/ms
     details_plot.clear()
-    details_plot.plot(times, np.ones_like(times), pen=None, symbol='t')
+    details_plot.plot(times, np.ones_like(times), pen=None, symbol='t', symbolBrush=color, symbolSize=10)
     details_plot.setLabel('bottom', 'Time (ms)')
     details_plot.setLabel('left', 'Spike Marker')
     
@@ -176,10 +195,10 @@ def on_point_clicked(data):
         message = f"        Spike n°{i+1} détecté à l'instant : {times[i]} ms\n"
         descriptive_data.append(message)
 
-# Ajout d'un QTextEdit pour afficher les messages de débogage
-descriptive_data = QTextEdit()
-descriptive_data.setReadOnly(True)
-descriptive_data.setMinimumHeight(200)  # Set minimum height for the QTextEdit widget
+
+
+
+descriptive_data.setMinimumHeight(200)
 tab2.layout.addWidget(descriptive_data)
 
 plot2_widget.pointClicked.connect(on_point_clicked)
