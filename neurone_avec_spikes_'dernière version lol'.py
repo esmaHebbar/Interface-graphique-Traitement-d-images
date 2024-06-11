@@ -140,7 +140,7 @@ plot2_widget.scatter = scatter
 # Ajout d'un QTextEdit pour afficher les messages de débogage
 descriptive_data = QTextEdit()
 descriptive_data.setReadOnly(True)
-tab2.layout.addWidget(descriptive_data)
+# tab2.layout.addWidget(descriptive_data)
 
 plot2_widget.setLabel('left', 'Neuron index')
 plot2_widget.setLabel('bottom', 'Time (ms)')
@@ -175,6 +175,12 @@ def on_point_clicked(data):
     for i in range (len(times)) :
         message = f"        Spike n°{i+1} détecté à l'instant : {times[i]} ms\n"
         descriptive_data.append(message)
+
+# Ajout d'un QTextEdit pour afficher les messages de débogage
+descriptive_data = QTextEdit()
+descriptive_data.setReadOnly(True)
+descriptive_data.setMinimumHeight(200)  # Set minimum height for the QTextEdit widget
+tab2.layout.addWidget(descriptive_data)
 
 plot2_widget.pointClicked.connect(on_point_clicked)
 
