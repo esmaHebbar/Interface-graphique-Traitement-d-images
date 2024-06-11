@@ -167,7 +167,6 @@ def import_data():
         print("Importing data from:", fileName)
         with open(fileName, 'r') as file:
             reader = csv.reader(file)
-            print(reader)
             for row in reader:
                 print(row) 
     
