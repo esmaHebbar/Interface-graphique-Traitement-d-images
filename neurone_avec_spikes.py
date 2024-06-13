@@ -5,11 +5,12 @@ Created on Wed Jun  5 10:29:16 2024
 """
 import numpy as np
 import pyqtgraph as pg
+from matplotlib import *
 from PyQt5.QtWidgets import QApplication, QMainWindow, QTabWidget, QWidget, QVBoxLayout
 from brian2 import *
 
+# On récupère les données de notre modèle
 from model_HH import Calculer
-
 nb_neuron,statemon,I_monitor ,spikemon= Calculer()
 
 # Configure the appearance of pyqtgraph
@@ -33,12 +34,14 @@ tab1.setLayout(tab1.layout)
 
 plot1_widget = pg.PlotWidget()
 tab1.layout.addWidget(plot1_widget)
+
 # Affichage du résultat de la simulation
 for i in range(nb_neuron):
     plot1_widget.plot(statemon.t/ms, statemon.v[i], pen=(i, nb_neuron))
 # Ajout des labels
 plot1_widget.setLabel('left', 'Membrane potential (V)')
 plot1_widget.setLabel('bottom', 'Time (ms)')
+
 # Ajout d'un quadrillage
 plot1_widget.showGrid(x=True, y=True, alpha=0.3)
 
@@ -71,8 +74,10 @@ tab3 = QWidget()
 tab_widget.addTab(tab3, "Stats")
 tab3.layout = QVBoxLayout()
 tab3.setLayout(tab3.layout)
-#plot3_widget = pg.PlotWidget()
-#tab3.layout.addWidget(plot3_widget)
+plot3_widget = pg.PlotWidget()
+tab3.layout.addWidget(plot3_widget)
+# for indice in range(nb_neuron):
+    
 
 # Affichage de la fenêtre
 window.show()
