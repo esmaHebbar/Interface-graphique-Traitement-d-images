@@ -42,7 +42,7 @@ class InteractivePlotWidget(pg.PlotWidget):
                 point = points[0]
                 point_data = point.data()
                 color = colors[point_data[1]]
-                self.pointClicked.emit((point_data, color))   
+                self.pointClicked.emit((point_data, color))
             else:
                 self.pointClicked.emit((None,None))
         super().mousePressEvent(event)
@@ -63,19 +63,7 @@ bouton1 = QPushButton("Run le modèle HH")
 bouton1.setMaximumWidth(200) 
 tab0.layout.addWidget(bouton1)
 
-def run_HH_model():
-    HH.v = El
-    HH.h = 0.75
-    HH.m = 0.15
-    HH.n = 0.35
-    HH.I = 30.0*uA
-    run(100*ms, report='text')
-    plot1_widget.clear()
-    plot1_widget.plot(statemon.t/ms, statemon.v[0], pen='k')
-    plot3_widget.clear()
-    plot3_widget.plot(statemon.t/ms, statemon.I[0]/uA, pen='r')
-
-bouton1.clicked.connect(run_HH_model)
+bouton1.clicked.connect(Calculer)
 
 # -----
 
