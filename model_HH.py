@@ -6,6 +6,7 @@ Created on Mon Jun 10 10:14:08 2024
 
 import numpy as np
 from brian2 import *
+import matplotlib.pyplot as plt
 
 def Calculer():
     defaultclock.dt = 0.01*ms
@@ -83,6 +84,10 @@ def Calculer():
     
     # Returns the number of neurons and the monitors
     return nb_neuron, statemon, I_monitor, spikemon
+
+def Calculer_MFR():
+    a=0
+    return a
 
 
 
