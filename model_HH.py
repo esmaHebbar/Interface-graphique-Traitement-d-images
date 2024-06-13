@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
 """
 Created on Mon Jun 10 10:14:08 2024
 
-@author: Guillaume
+@author: Guillaume et Esma
 """
 
 import numpy as np
@@ -11,18 +10,21 @@ from brian2 import *
 def Calculer():
     defaultclock.dt = 0.01*ms
     
+    # Number of neurons in the group
     nb_neuron=10
     
-    # Paramètres du modèle de Hodgkin-Huxley
-    Cm = 1.0*ufarad
-    El = 0*mV
-    ENa = 120.0*mV
-    EK = -12.0*mV
-    gl0 = 0.3*msiemens
-    gNa0 = 120.0*msiemens
-    gK0 = 36.0*msiemens
+    # Hodgkin-Huxley model parameters
+    Cm = 1.0*ufarad # Membrane capacitance
     
-    # Équations différentielles pour le modèle de Hodgkin-Huxley
+    El = 0*mV # Leakage reversal potential
+    ENa = 120.0*mV # Sodium reversal potential
+    EK = -12.0*mV # Potassium reversal potential
+    
+    gl0 = 0.3*msiemens # Leakage conductance
+    gNa0 = 120.0*msiemens  # Sodium conductance
+    gK0 = 36.0*msiemens # Potassium conductance
+    
+    # Differential equations for the Hodgkin-Huxley model
     eqs = '''
     dv/dt = (I+I_noise - gl * (v-El) - gNa * m**3 * h * (v-ENa) - gK * n**4 * (v-EK))/Cm : volt
     I : amp (constant)  # Courant appliqué
@@ -45,10 +47,10 @@ def Calculer():
     gl : siemens
     '''
     
-    # Créer un groupe de neurones avec les équations définies
+    # Create a group of neurons with the defined equations
     HH = NeuronGroup(nb_neuron, eqs, threshold='v>20*mV', refractory=3*ms, method='rk4')
     
-    # Initialisation des variables
+    # Initialization of variables
     HH.v = El
     HH.h = 0.75
     HH.m = 0.15
@@ -58,27 +60,28 @@ def Calculer():
     HH.gK = gK0
     HH.gl = gl0
     
+    # Add random noise to the current
     I_noise=np.random.normal(0.1,0.1)*uA 
     
-    # Enregistrer les variables d'état et les spikes
+    # Record state variables and spikes
     statemon = StateMonitor(HH, True, record=True)
     I_monitor = StateMonitor(HH, 'I', record=True)
     spikemon = SpikeMonitor(HH)
     
-    # Créer explicitement un objet Network et y ajouter les objets de simulation
-    net = Network(HH, statemon, spikemon, I_monitor)  # Ajout de I_monitor au réseau
+    # Create a Network object and add simulation objects to it
+    net = Network(HH, statemon, spikemon, I_monitor)
     
-    # Simulation avec différents courants appliqués
+    # Simulation with different applied currents
     HH.I = 0.0*uA
     net.run(50*ms, report='text')
     
-    # Définir des courants aléatoires proches de 60 µA pour chaque neurone
     HH.I = np.random.normal(60, 5, nb_neuron) * uA
     net.run(50*ms, report='text')
     
     HH.I = 0.0*uA
     net.run(50*ms, report='text')
     
+    # Returns the number of neurons and the monitors
     return nb_neuron, statemon, I_monitor, spikemon
 
 
