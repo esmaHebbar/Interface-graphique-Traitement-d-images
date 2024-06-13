@@ -11,7 +11,7 @@ from PyQt5.QtCore import pyqtSignal
 from brian2 import *
 import random
 
-from model_HH import Calculer
+from HH_model import Calculer
 
 nb_neuron, statemon, I_monitor, spikemon = Calculer()
 
