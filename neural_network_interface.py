@@ -22,8 +22,6 @@ pg.setConfigOption('background', 'w')
 app = QApplication([])
 window = QMainWindow()
 window.setWindowTitle('Interface Graphique Modulaire')
-
-# Tab configurations
 tab_widget = QTabWidget()
 window.setCentralWidget(tab_widget)
 
@@ -39,15 +37,12 @@ class InteractivePlotWidget(pg.PlotWidget):
     def mousePressEvent(self, event):
         if self.scatter:
             pos = self.plotItem.vb.mapSceneToView(event.pos())
-            points = self.scatter.pointsAt(pos)
-         
+            points = self.scatter.pointsAt(pos) 
             if points:
                 point = points[0]
                 point_data = point.data()
-                color = colors[point_data[1]]  # Récupérer la couleur en utilisant l'index du neurone
-                point_data_with_color = (point_data, color)
-                self.pointClicked.emit(point_data_with_color)
-               
+                color = colors[point_data[1]]
+                self.pointClicked.emit((point_data, color))   
             else:
                 self.pointClicked.emit((None,None))
         super().mousePressEvent(event)
@@ -55,7 +50,7 @@ class InteractivePlotWidget(pg.PlotWidget):
 
 
 #--------------------------------------
-# Tab 0 for the first page
+# Tab 0 for preferences
 tab0 = QWidget()
 tab_widget.addTab(tab0, "Préférences")
 tab0.layout = QVBoxLayout()
@@ -63,34 +58,28 @@ tab0.setLayout(tab0.layout)
 
 # -----
 
-# Button 1 in order to run HH model
+# Button 1 to run HH model
 bouton1 = QPushButton("Run le modèle HH")
 bouton1.setMaximumWidth(200) 
 tab0.layout.addWidget(bouton1)
 
 def run_HH_model():
-    # Reinitialize the neuron group's membrane potential
     HH.v = El
     HH.h = 0.75
     HH.m = 0.15
     HH.n = 0.35
     HH.I = 30.0*uA
-
     run(100*ms, report='text')
-
-    # Update the plots with the new data
     plot1_widget.clear()
     plot1_widget.plot(statemon.t/ms, statemon.v[0], pen='k')
     plot3_widget.clear()
     plot3_widget.plot(statemon.t/ms, statemon.I[0]/uA, pen='r')
 
-    print("HH model running!")
-
 bouton1.clicked.connect(run_HH_model)
 
 # -----
 
-# Button 2 pour importer des données
+# Button to import data
 bouton2 = QPushButton("Importer les données en .csv")
 bouton2.setMaximumWidth(200) 
 tab0.layout.addWidget(bouton2)
@@ -105,7 +94,6 @@ def import_data():
             reader = csv.reader(file)
             for row in reader:
                 print(row) 
-    
     print("Data imported successfully!")
 
 bouton2.clicked.connect(import_data)
@@ -122,6 +110,7 @@ tab1.layout.addWidget(plot1_widget)
 
 for i in range(nb_neuron):
     plot1_widget.plot(statemon.t/ms, statemon.v[i], pen=(i, nb_neuron))
+    
 plot1_widget.setLabel('left', 'Membrane potential (V)')
 plot1_widget.setLabel('bottom', 'Time (ms)')
 plot3_widget = pg.PlotWidget()
@@ -146,22 +135,22 @@ spike_data = []
 for t, i in zip(spikemon.t, spikemon.i):
     spike_data.append({'pos': (t/ms, i), 'data': (t/ms, i), 'brush': colors[i], 'size': 5})
 
-
 scatter = pg.ScatterPlotItem(pen=None, symbol='o')
 plot2_widget.addItem(scatter)
 scatter.addPoints(spike_data)
 plot2_widget.scatter = scatter
-
 
 descriptive_data = QTextEdit()
 descriptive_data.setReadOnly(True)
 
 plot2_widget.setLabel('left', 'Neuron index')
 plot2_widget.setLabel('bottom', 'Time (ms)')
-details_layout = QVBoxLayout()
-tab2.layout.addLayout(details_layout)
-details_plot = pg.PlotWidget()
-details_layout.addWidget(details_plot)
+
+membrane_potential_plot = pg.PlotWidget()
+membrane_potential_plot.setLabel('left', 'Membrane Potential (V)')
+membrane_potential_plot.setLabel('bottom', 'Time (ms)')
+tab2.layout.addWidget(membrane_potential_plot)
+
 
 def on_point_clicked(data_with_color):
     if data_with_color is None:
@@ -169,31 +158,32 @@ def on_point_clicked(data_with_color):
         return
     
     data, color = data_with_color  
+    neuron_index = data[1]
+    
+    times = statemon.t/ms
+    voltages = statemon.v[neuron_index]
     
     message = f'-------------------------------------------------------------------------------------------------------------\n'
     descriptive_data.append(message)
     message = f'Données sur le point cliqué : \n'
     descriptive_data.append(message)
-    
-    neuron_index = data[1]
     message = f'        Neuron index : {neuron_index}\n'
     descriptive_data.append(message)
     
-    times = spikemon.t[spikemon.i == neuron_index]/ms
-    details_plot.clear()
-    details_plot.plot(times, np.ones_like(times), pen=None, symbol='t', symbolBrush=color, symbolSize=10)
-    details_plot.setLabel('bottom', 'Time (ms)')
-    details_plot.setLabel('left', 'Spike Marker')
+    membrane_potential_plot.clear()
+    membrane_potential_plot.plot(times, voltages, pen={'color': color, 'width': 2})
+    membrane_potential_plot.setLabel('bottom', 'Time (ms)')
+    membrane_potential_plot.setLabel('left', 'Membrane Potential (V)')
     
-    for i in range (len(times)) :
-        message = f"        Spike n°{i+1} détecté à l'instant : {times[i]} ms\n"
+    spikes = spikemon.t[spikemon.i == neuron_index]/ms
+    for i, spike_time in enumerate(spikes):
+        message = f"        Spike n°{i+1} détecté à l'instant : {spike_time} ms\n"
         descriptive_data.append(message)
 
 descriptive_data.setMinimumHeight(200)
 tab2.layout.addWidget(descriptive_data)
 
 plot2_widget.pointClicked.connect(on_point_clicked)
-
 
 #--------------------------------------
 
