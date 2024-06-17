@@ -13,7 +13,7 @@ import random
 import matplotlib.pyplot as plt
 
 from simulate_hh import Calculer
-from calculate_mfr
+from analysis_graphs import calculate_mfr
 
 nb_neuron, statemon, I_monitor, spikemon, S = Calculer()
 
