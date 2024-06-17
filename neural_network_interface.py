@@ -6,6 +6,8 @@ Created on Jun 2024
 
 """
 #--------------------------------------
+# Importation des bibliothèques
+#--------------------------------------
 
 import sys
 import numpy as np
@@ -24,6 +26,8 @@ from analysis_graphs import Calculate_mfr, Calculate_isi
 
 #--------------------------------------
 # Configure the appearance of pyqtgraph
+#--------------------------------------
+
 pg.setConfigOption('background', 'w')
 
 # Application and main window creation
@@ -37,6 +41,8 @@ window.setCentralWidget(tab_widget)
 
 #--------------------------------------
 # Custom interactive plot widget class
+#--------------------------------------
+
 class InteractivePlotWidget(pg.PlotWidget):
     pointClicked = pyqtSignal(object)
 
@@ -69,7 +75,7 @@ tab_widget.addTab(tab_preferences, "Preferences")
 tab_preferences.layout = QVBoxLayout()
 tab_preferences.setLayout(tab_preferences.layout)
 
-# Button 1 in order to run HH model
+# Button 1 to run HH model
 button_run = QPushButton("Run HH model")
 button_run.setMaximumWidth(200) 
 tab_preferences.layout.addWidget(button_run)
@@ -78,7 +84,7 @@ nb_neuron, statemon, I_monitor, spikemon, S = Simulate_hh()
 
 button_run.clicked.connect(Simulate_hh)
 
-# Button 2 pour importer des données
+# Button 2to import data
 button_import = QPushButton("Import data in .csv")
 button_import.setMaximumWidth(200) 
 tab_preferences.layout.addWidget(button_import)
@@ -101,6 +107,7 @@ button_import.clicked.connect(import_data)
 #--------------------------------------
 # Oscilloscope tab
 #--------------------------------------
+
 tab_oscilloscope = QWidget()
 tab_widget.addTab(tab_oscilloscope, "Oscilloscope")
 tab_oscilloscope.layout = QVBoxLayout()
@@ -204,9 +211,20 @@ tab_stats.layout = QVBoxLayout()
 tab_stats.setLayout(tab_stats.layout)
 
 #MFR
+labels,hist_data=Calculate_mfr(nb_neuron,spikemon)
+labels = [int(label) for label in labels]
+mfr_plot_widget = pg.PlotWidget()
+tab_stats.layout.addWidget(mfr_plot_widget)
+
+mfr_plot_widget.clear()
+mfr_plot_widget.plot(labels, hist_data, stepMode=False, fillLevel=0, brush=(0, 0, 255, 150))
+mfr_plot_widget.setLabel('left', 'Nombre de Spikes par Secondes (Hz)')
+mfr_plot_widget.setLabel('bottom', 'Temps (ms)')
+mfr_plot_widget.setTitle('Mean Firing Rate Network (MFR)')  # Ajouter un titre au graphique
+
 
 #ISI
-x,y=Calculate_isi()
+x,y=Calculate_isi(nb_neuron,spikemon)
 
 isi_plot_widget = pg.PlotWidget()
 tab_stats.layout.addWidget(isi_plot_widget)
@@ -217,11 +235,12 @@ isi_plot_widget.setLabel('left', 'Number of intervals')
 isi_plot_widget.setLabel('bottom', 'Interspike interval (ms)')
 
 #IBI
-
+# TODO
 
 #--------------------------------------
 #  Tab for synapses
 #--------------------------------------
+
 tab_synapses = QWidget()
 tab_widget.addTab(tab_synapses, "Synapse Connectivity")
 tab_synapses.layout = QVBoxLayout()
@@ -230,36 +249,25 @@ tab_synapses.setLayout(tab_synapses.layout)
 plot_synapses = pg.GraphicsLayoutWidget()
 tab_synapses.layout.addWidget(plot_synapses)
 
-# Button to export synapses
-button_synapses = QPushButton("Export data in .csv")
-button_synapses.setMaximumWidth(200) 
-tab_synapses.layout.addWidget(button_synapses)
-
-def plot_synapses_histogram():
-    glw = plot_synapses
-    glw.clear()
+glw = plot_synapses
+glw.clear()
     
-    Ns = len(S.source)
-    Nt = len(S.target)
+Ns = len(S.source)
+Nt = len(S.target)
     
-    p1 = glw.addPlot(title="Source and Target Neurons")
-    p1.plot(zeros(Ns), arange(Ns), pen=None, symbol='o', symbolBrush='k', symbolSize=10)
-    p1.plot(ones(Nt), arange(Nt), pen=None, symbol='o', symbolBrush='k', symbolSize=10)
-    for i, j in zip(S.i, S.j):
-        p1.plot([0, 1], [i, j], pen='k')
-    p1.getAxis('bottom').setTicks([[(0, 'Source'), (1, 'Target')]])
-    p1.getAxis('left').setLabel('Neuron index')
+p1 = glw.addPlot(title="Source and Target Neurons")
+p1.plot(zeros(Ns), arange(Ns), pen=None, symbol='o', symbolBrush='k', symbolSize=10)
+p1.plot(ones(Nt), arange(Nt), pen=None, symbol='o', symbolBrush='k', symbolSize=10)
+for i, j in zip(S.i, S.j):
+    p1.plot([0, 1], [i, j], pen='k')
+p1.getAxis('bottom').setTicks([[(0, 'Source'), (1, 'Target')]])
+p1.getAxis('left').setLabel('Neuron index')
 
-    # Plot source neuron index vs. target neuron index
-    p2 = glw.addPlot(title="Source vs Target Neuron Index")
-    p2.plot(np.array(S.i), np.array(S.j), pen=None, symbol='o', symbolBrush='k')
-    p2.setLabel('bottom', 'Source neuron index')
-    p2.setLabel('left', 'Target neuron index')
-
-
-button_synapses.clicked.connect(plot_synapses_histogram)
-
-# plot_synapses_histogram()
+# Plot source neuron index vs. target neuron index
+p2 = glw.addPlot(title="Source vs Target Neuron Index")
+p2.plot(np.array(S.i), np.array(S.j), pen=None, symbol='o', symbolBrush='k')
+p2.setLabel('bottom', 'Source neuron index')
+p2.setLabel('left', 'Target neuron index')
 
 #--------------------------------------
 # Tab for data export
