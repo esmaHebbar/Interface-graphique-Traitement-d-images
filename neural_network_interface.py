@@ -6,6 +6,8 @@ Created on Jun 2024
 
 """
 #--------------------------------------
+# Importation des bibliothèques
+#--------------------------------------
 import sys
 import numpy as np
 import pyqtgraph as pg
@@ -16,12 +18,16 @@ import random
 import matplotlib.pyplot as plt
 
 from simulate_hh import Simulate_hh
-nb_neuron, statemon, I_monitor, spikemon, S = Simulate_hh()
-
 from analysis_graphs import Calculate_mfr, Calculate_isi
 
 #--------------------------------------
+# On lance le modèle
+#--------------------------------------
+nb_neuron, statemon, I_monitor, spikemon, S = Simulate_hh()
+
+#--------------------------------------
 # Configure the appearance of pyqtgraph
+#--------------------------------------
 pg.setConfigOption('background', 'w')
 
 # Application and main window creation
@@ -35,6 +41,7 @@ window.setCentralWidget(tab_widget)
 
 #--------------------------------------
 # Custom interactive plot widget class
+#--------------------------------------
 class InteractivePlotWidget(pg.PlotWidget):
     pointClicked = pyqtSignal(object)
 
@@ -61,7 +68,6 @@ class InteractivePlotWidget(pg.PlotWidget):
 #--------------------------------------
 # First page : preferences
 #--------------------------------------
-
 tab_preferences = QWidget()
 tab_widget.addTab(tab_preferences, "Preferences")
 tab_preferences.layout = QVBoxLayout()
@@ -147,33 +153,34 @@ details_plot = pg.PlotWidget()
 details_layout.addWidget(details_plot)
 
 def on_point_clicked(data_with_color):
-    if data_with_color is None:
+    print("data",data_with_color)
+    if data_with_color[0]==None:
         descriptive_data.append("Aucun point de données n'a été cliqué.\n")
         return
-    
-    data, color = data_with_color  
-    
-    message = f'-------------------------------------------------------------------------------------------------------------\n'
-    descriptive_data.append(message)
-    message = f'Données sur le point cliqué : \n'
-    descriptive_data.append(message)
-    
-    neuron_index = data[1]
-    message = f'        Neuron index : {neuron_index}\n'
-    descriptive_data.append(message)
-    
-    # times = spikemon.t[spikemon.i == neuron_index]/ms
-    times=statemon.t/ms
-    voltages=statemon.v[neuron_index]
-    details_plot.clear()
-    details_plot.plot(times, voltages, pen={'color':color,'width':2})
-    details_plot.setLabel('bottom', 'Time (ms)')
-    details_plot.setLabel('left', 'Voltage')
-    
-    spikes=spikemon.t[spikemon.i==neuron_index]/ms
-    for i,spike_time in enumerate (spikes) :
-        message = f"        Spike n°{i+1} détecté à l'instant : {spike_time} ms\n"
+    else :
+        data, color = data_with_color 
+        
+        message = f'-------------------------------------------------------------------------------------------------------------\n'
         descriptive_data.append(message)
+        message = f'Données sur le point cliqué : \n'
+        descriptive_data.append(message)
+        
+        neuron_index = data[1]
+        message = f'        Neuron index : {neuron_index}\n'
+        descriptive_data.append(message)
+        
+        # times = spikemon.t[spikemon.i == neuron_index]/ms
+        times=statemon.t/ms
+        voltages=statemon.v[neuron_index]
+        details_plot.clear()
+        details_plot.plot(times, voltages, pen={'color':color,'width':2})
+        details_plot.setLabel('bottom', 'Time (ms)')
+        details_plot.setLabel('left', 'Voltage')
+        
+        spikes=spikemon.t[spikemon.i==neuron_index]/ms
+        for i,spike_time in enumerate (spikes) :
+            message = f"        Spike n°{i+1} détecté à l'instant : {spike_time} ms\n"
+            descriptive_data.append(message)
 
 descriptive_data.setMinimumHeight(200)
 tab2.layout.addWidget(descriptive_data)
@@ -183,26 +190,24 @@ plot2_widget.pointClicked.connect(on_point_clicked)
 #--------------------------------------
 #  Tab for stats
 #--------------------------------------
-
 tab_stats = QWidget()
 tab_widget.addTab(tab_stats, "Stats")
 tab_stats.layout = QVBoxLayout()
 tab_stats.setLayout(tab_stats.layout)
 
-#MFR
-# labels,hist_data=Calculate_mfr()
+# MFR
+labels,hist_data=Calculate_mfr(nb_neuron,spikemon)
+labels = [int(label) for label in labels]
+mfr_plot_widget = pg.PlotWidget()
+tab_stats.layout.addWidget(mfr_plot_widget)
 
+mfr_plot_widget.clear()
+mfr_plot_widget.plot(labels, hist_data, stepMode=True, fillLevel=0, brush=(0, 0, 255, 150))
+mfr_plot_widget.setLabel('left', 'Nombre de Spikes par Neurone')
+mfr_plot_widget.setLabel('bottom', 'Histogramme et Courbe des Spikes par Intervalle de Temps')
 
-# mfr_plot_widget = pg.PlotWidget()
-# tab_stats.layout.addWidget(mfr_plot_widget)
-
-# mfr_plot_widget.clear()
-# mfr_plot_widget.plot(labels, hist_data, stepMode=True, fillLevel=0, brush=(0, 0, 255, 150))
-# mfr_plot_widget.setLabel('left', 'Nombre de Spikes par Neurone')
-# mfr_plot_widget.setLabel('bottom', 'Histogramme et Courbe des Spikes par Intervalle de Temps')
-
-#ISI
-x,y=Calculate_isi()
+# ISI
+x,y=Calculate_isi(nb_neuron,spikemon)
 
 isi_plot_widget = pg.PlotWidget()
 tab_stats.layout.addWidget(isi_plot_widget)
@@ -212,8 +217,8 @@ isi_plot_widget.plot(x, y, stepMode=True, fillLevel=0, brush=(0, 0, 255, 150))
 isi_plot_widget.setLabel('left', 'Nombre d\'intervalles')
 isi_plot_widget.setLabel('bottom', 'Intervalle interspikes (ms)')
 
-#IBI
-
+# IBI
+# TODO
 
 #--------------------------------------
 #  Tab for synapses
@@ -226,36 +231,25 @@ tab_synapses.setLayout(tab_synapses.layout)
 plot_synapses = pg.GraphicsLayoutWidget()
 tab_synapses.layout.addWidget(plot_synapses)
 
-def plot_synapses_histogram():
-    glw = plot_synapses
-    glw.clear()
+glw = plot_synapses
+glw.clear()
     
-    Ns = len(S.source)
-    Nt = len(S.target)
+Ns = len(S.source)
+Nt = len(S.target)
     
-    p1 = glw.addPlot(title="Source and Target Neurons")
-    p1.plot(zeros(Ns), arange(Ns), pen=None, symbol='o', symbolBrush='k', symbolSize=10)
-    p1.plot(ones(Nt), arange(Nt), pen=None, symbol='o', symbolBrush='k', symbolSize=10)
-    for i, j in zip(S.i, S.j):
-        p1.plot([0, 1], [i, j], pen='k')
-    p1.getAxis('bottom').setTicks([[(0, 'Source'), (1, 'Target')]])
-    p1.getAxis('left').setLabel('Neuron index')
+p1 = glw.addPlot(title="Source and Target Neurons")
+p1.plot(zeros(Ns), arange(Ns), pen=None, symbol='o', symbolBrush='k', symbolSize=10)
+p1.plot(ones(Nt), arange(Nt), pen=None, symbol='o', symbolBrush='k', symbolSize=10)
+for i, j in zip(S.i, S.j):
+    p1.plot([0, 1], [i, j], pen='k')
+p1.getAxis('bottom').setTicks([[(0, 'Source'), (1, 'Target')]])
+p1.getAxis('left').setLabel('Neuron index')
 
-    # Plot source neuron index vs. target neuron index
-    p2 = glw.addPlot(title="Source vs Target Neuron Index")
-    p2.plot(np.array(S.i), np.array(S.j), pen=None, symbol='o', symbolBrush='k')
-    p2.setLabel('bottom', 'Source neuron index')
-    p2.setLabel('left', 'Target neuron index')
-
-# Button to export data
-button_synapses = QPushButton("Export data in .csv")
-button_synapses.setMaximumWidth(200) 
-tab_synapses.layout.addWidget(button_synapses)
-
-button_synapses.clicked.connect(plot_synapses_histogram)
-
-# plot_synapses_histogram()
-
+# Plot source neuron index vs. target neuron index
+p2 = glw.addPlot(title="Source vs Target Neuron Index")
+p2.plot(np.array(S.i), np.array(S.j), pen=None, symbol='o', symbolBrush='k')
+p2.setLabel('bottom', 'Source neuron index')
+p2.setLabel('left', 'Target neuron index')
 
 #--------------------------------------
 # Tab for data export

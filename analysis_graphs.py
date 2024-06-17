@@ -4,13 +4,9 @@ Created on Jun 2024
 
 @authors : Demets Guillaume & Hebbar Esma
 """
-import matplotlib.pyplot as plt
 from brian2 import *
-from simulate_hh import Simulate_hh
 
-nb_neuron, statemon, I_monitor, spikemon,S = Simulate_hh()
-
-def Calculate_mfr():
+def Calculate_mfr(nb_neuron,spikemon):
     duree_totale = 150  # en ms
     taille_intervalle = 5  # en ms
     
@@ -39,7 +35,7 @@ def Calculate_mfr():
     
     return labels, hist_data
 
-def Calculate_isi():
+def Calculate_isi(nb_neuron,spikemon):
     isi_values = [] #contenant les valeurs des intervalles interspikes
     
     for m in range (nb_neuron):
@@ -59,8 +55,3 @@ def Calculate_isi():
         bins = np.logspace(np.log10(min(isi_values)), np.log10(max(isi_values)), 50)  # Utilisez une échelle logarithmique pour les bins
         y, x = np.histogram(isi_values, bins=bins)
     return x,y
-
-
-# Appeler la fonction pour obtenir les données
-nb_neuron, statemon, I_monitor, spikemon,S = Calculer()
-Calculer_MFR(nb_neuron,spikemon)

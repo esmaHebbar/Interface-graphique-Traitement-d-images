@@ -75,14 +75,14 @@ def Simulate_hh():
     net = Network(HH, statemon, spikemon, I_monitor)
     
     # Simulation with different applied currents
-    #HH.I = 0.0*uA
-    #net.run(50*ms, report='text')
+    HH.I = 0.0*uA
+    net.run(10*ms, report='text')
     
-    HH.I = np.random.normal(60, 15, nb_neuron) * uA
+    HH.I = np.random.normal(60, 2.5, nb_neuron) * uA
     net.run(50*ms, report='text')
     
-    #HH.I = 0.0*uA
-    #net.run(50*ms, report='text')
+    HH.I = 0.0*uA
+    net.run(10*ms, report='text')
     
     # Returns the number of neurons, the monitors, and the synapses
     return nb_neuron, statemon, I_monitor, spikemon, S
