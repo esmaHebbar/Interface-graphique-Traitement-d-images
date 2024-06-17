@@ -6,19 +6,20 @@ Created on Jun 2024
 
 """
 #--------------------------------------
+
 import sys
 import numpy as np
 import pyqtgraph as pg
-from PyQt5.QtWidgets import QApplication, QMainWindow, QTabWidget, QWidget, QVBoxLayout, QTextEdit, QPushButton, QFileDialog
-from PyQt5.QtCore import pyqtSignal
-from brian2 import *
 import random
 import matplotlib.pyplot as plt
 
+from PyQt5.QtWidgets import QApplication, QMainWindow, QTabWidget, QWidget, QVBoxLayout, QTextEdit, QPushButton, QFileDialog
+from PyQt5.QtCore import pyqtSignal
+from brian2 import *
+from random import randint
+
 
 from simulate_hh import Simulate_hh
-nb_neuron, statemon, I_monitor, spikemon, S = Simulate_hh()
-
 from analysis_graphs import Calculate_mfr, Calculate_isi
 
 #--------------------------------------
@@ -69,15 +70,18 @@ tab_preferences.layout = QVBoxLayout()
 tab_preferences.setLayout(tab_preferences.layout)
 
 # Button 1 in order to run HH model
-button_run = QPushButton("Run le modèle HH")
+button_run = QPushButton("Run HH model")
 button_run.setMaximumWidth(200) 
 tab_preferences.layout.addWidget(button_run)
+
+nb_neuron, statemon, I_monitor, spikemon, S = Simulate_hh()
+
 button_run.clicked.connect(Simulate_hh)
 
 # Button 2 pour importer des données
-bouton2 = QPushButton("Importer les données en .csv")
-bouton2.setMaximumWidth(200) 
-tab_preferences.layout.addWidget(bouton2)
+button_import = QPushButton("Import data in .csv")
+button_import.setMaximumWidth(200) 
+tab_preferences.layout.addWidget(button_import)
 
 def import_data():
     import csv
@@ -92,64 +96,73 @@ def import_data():
     
     print("Data imported successfully!")
 
-bouton2.clicked.connect(import_data)
+button_import.clicked.connect(import_data)
 
 #--------------------------------------
 # Oscilloscope tab
 #--------------------------------------
-tab1 = QWidget()
-tab_widget.addTab(tab1, "Oscilloscope")
-tab1.layout = QVBoxLayout()
-tab1.setLayout(tab1.layout)
-plot1_widget = pg.PlotWidget()
-tab1.layout.addWidget(plot1_widget)
+tab_oscilloscope = QWidget()
+tab_widget.addTab(tab_oscilloscope, "Oscilloscope")
+tab_oscilloscope.layout = QVBoxLayout()
+tab_oscilloscope.setLayout(tab_oscilloscope.layout)
+
+#first graph : mambrane potential as a function of time
+plot_scatterplot = pg.PlotWidget()
+tab_oscilloscope.layout.addWidget(plot_scatterplot)
 
 for i in range(nb_neuron):
-    plot1_widget.plot(statemon.t/ms, statemon.v[i], pen=(i, nb_neuron))
-plot1_widget.setLabel('left', 'Membrane potential (V)')
-plot1_widget.setLabel('bottom', 'Time (ms)')
-plot3_widget = pg.PlotWidget()
-tab1.layout.addWidget(plot3_widget)
-for i in range(nb_neuron):
-    plot3_widget.plot(statemon.t/ms, statemon.I[i]/uA, pen=(i, nb_neuron))
-plot3_widget.setLabel('left', 'Currents (uA)')
-plot3_widget.setLabel('bottom', 'Time (ms)')
-plot1_widget.showGrid(x=True, y=True, alpha=0.3)
+    plot_scatterplot.plot(statemon.t/ms, statemon.v[i], pen=(i, nb_neuron))
+plot_scatterplot.setLabel('left', 'Membrane potential (V)')
+plot_scatterplot.setLabel('bottom', 'Time (ms)')
+plot_scatterplot.showGrid(x=True, y=True, alpha=0.3)
 
+#second plot : current as a function of time
+plot_input_current  = pg.PlotWidget()
+tab_oscilloscope.layout.addWidget(plot_input_current)
+for i in range(nb_neuron):
+    plot_input_current.plot(statemon.t/ms, statemon.I[i]/uA, pen=(i, nb_neuron))
+plot_input_current.setLabel('left', 'Currents (uA)')
+plot_input_current.setLabel('bottom', 'Time (ms)')
+
+#--------------------------------------
 # Rasterplot tab
-tab2 = QWidget()
-tab_widget.addTab(tab2, "Rasterplot")
-tab2.layout = QVBoxLayout()
-tab2.setLayout(tab2.layout)
-plot2_widget = InteractivePlotWidget()
-tab2.layout.addWidget(plot2_widget)
+#--------------------------------------
+tab_rasterplot = QWidget()
+tab_widget.addTab(tab_rasterplot, "Rasterplot")
+tab_rasterplot.layout = QVBoxLayout()
+tab_rasterplot.setLayout(tab_rasterplot.layout)
+
+#first graph : neuron index as a function of time
+plot_rasterplot = InteractivePlotWidget()
+tab_rasterplot.layout.addWidget(plot_rasterplot)
 
 # Création d'une liste de couleurs, une pour chaque neurone
-colors = [pg.mkColor((random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))) for _ in range(nb_neuron)]
+colors = [pg.mkColor((randint(0, 255), randint(0, 255), randint(0, 255))) for _ in range(nb_neuron)]
 
 spike_data = []
 for t, i in zip(spikemon.t, spikemon.i):
     spike_data.append({'pos': (t/ms, i), 'data': (t/ms, i), 'brush': colors[i], 'size': 5})
 
 scatter = pg.ScatterPlotItem(pen=None, symbol='o')
-plot2_widget.addItem(scatter)
+plot_rasterplot.addItem(scatter)
 scatter.addPoints(spike_data)
-plot2_widget.scatter = scatter
+plot_rasterplot.scatter = scatter
 
-
+# window for text and data
 descriptive_data = QTextEdit()
 descriptive_data.setReadOnly(True)
 
-plot2_widget.setLabel('left', 'Neuron index')
-plot2_widget.setLabel('bottom', 'Time (ms)')
+plot_rasterplot.setLabel('left', 'Neuron index')
+plot_rasterplot.setLabel('bottom', 'Time (ms)')
+
 details_layout = QVBoxLayout()
-tab2.layout.addLayout(details_layout)
+tab_rasterplot.layout.addLayout(details_layout)
 details_plot = pg.PlotWidget()
 details_layout.addWidget(details_plot)
 
 def on_point_clicked(data_with_color):
     if data_with_color is None:
-        descriptive_data.append("Aucun point de données n'a été cliqué.\n")
+        descriptive_data.append("No data point was clicked.\n")
         return
     
     data, color = data_with_color  
@@ -173,13 +186,13 @@ def on_point_clicked(data_with_color):
     
     spikes=spikemon.t[spikemon.i==neuron_index]/ms
     for i,spike_time in enumerate (spikes) :
-        message = f"        Spike n°{i+1} détecté à l'instant : {spike_time} ms\n"
+        message = f"        Spike number {i+1} detected at time : {spike_time} ms\n"
         descriptive_data.append(message)
 
 descriptive_data.setMinimumHeight(200)
-tab2.layout.addWidget(descriptive_data)
+tab_rasterplot.layout.addWidget(descriptive_data)
 
-plot2_widget.pointClicked.connect(on_point_clicked)
+plot_rasterplot.pointClicked.connect(on_point_clicked)
 
 #--------------------------------------
 #  Tab for stats
@@ -191,16 +204,6 @@ tab_stats.layout = QVBoxLayout()
 tab_stats.setLayout(tab_stats.layout)
 
 #MFR
-# labels,hist_data=Calculate_mfr()
-
-
-# mfr_plot_widget = pg.PlotWidget()
-# tab_stats.layout.addWidget(mfr_plot_widget)
-
-# mfr_plot_widget.clear()
-# mfr_plot_widget.plot(labels, hist_data, stepMode=True, fillLevel=0, brush=(0, 0, 255, 150))
-# mfr_plot_widget.setLabel('left', 'Nombre de Spikes par Neurone')
-# mfr_plot_widget.setLabel('bottom', 'Histogramme et Courbe des Spikes par Intervalle de Temps')
 
 #ISI
 x,y=Calculate_isi()
@@ -210,8 +213,8 @@ tab_stats.layout.addWidget(isi_plot_widget)
 
 isi_plot_widget.clear()
 isi_plot_widget.plot(x, y, stepMode=True, fillLevel=0, brush=(0, 0, 255, 150))
-isi_plot_widget.setLabel('left', 'Nombre d\'intervalles')
-isi_plot_widget.setLabel('bottom', 'Intervalle interspikes (ms)')
+isi_plot_widget.setLabel('left', 'Number of intervals')
+isi_plot_widget.setLabel('bottom', 'Interspike interval (ms)')
 
 #IBI
 
@@ -226,6 +229,11 @@ tab_synapses.setLayout(tab_synapses.layout)
 
 plot_synapses = pg.GraphicsLayoutWidget()
 tab_synapses.layout.addWidget(plot_synapses)
+
+# Button to export synapses
+button_synapses = QPushButton("Export data in .csv")
+button_synapses.setMaximumWidth(200) 
+tab_synapses.layout.addWidget(button_synapses)
 
 def plot_synapses_histogram():
     glw = plot_synapses
@@ -248,15 +256,10 @@ def plot_synapses_histogram():
     p2.setLabel('bottom', 'Source neuron index')
     p2.setLabel('left', 'Target neuron index')
 
-# Button to export data
-button_synapses = QPushButton("Export data in .csv")
-button_synapses.setMaximumWidth(200) 
-tab_synapses.layout.addWidget(button_synapses)
 
 button_synapses.clicked.connect(plot_synapses_histogram)
 
 # plot_synapses_histogram()
-
 
 #--------------------------------------
 # Tab for data export
