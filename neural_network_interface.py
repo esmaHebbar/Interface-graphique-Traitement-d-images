@@ -220,6 +220,10 @@ def plot_isi_histogram():
 # tab_stats.layout.addWidget(update_isi_button)
 # update_isi_button.clicked.connect(plot_isi_histogram)
 
+
+# MFR_plot_widget = pg.PlotWidget()
+# tab_stats.layout.addWidget(MFR_plot_widget)
+
 # def MFR():
 #     duree_totale = 150  # en ms
 #     taille_intervalle = 5  # en ms
@@ -251,9 +255,6 @@ def plot_isi_histogram():
 
 
 plot_isi_histogram()
-
-# MFR_plot_widget = pg.PlotWidget()
-# tab_stats.layout.addWidget(MFR_plot_widget)
 # MFR()
 
 
