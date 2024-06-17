@@ -1,12 +1,14 @@
 """
-Created on Mon Jun 10 10:14:08 2024
-@author: Guillaume et Esma
+Created on Jun 2024
+
+@authors : Demets Guillaume & Hebbar Esma
+
 """
 
 import numpy as np
 from brian2 import *
 
-def Calculer():
+def Simulate_hh():
     defaultclock.dt = 0.01*ms
     
     # Number of neurons in the group
@@ -73,14 +75,14 @@ def Calculer():
     net = Network(HH, statemon, spikemon, I_monitor)
     
     # Simulation with different applied currents
-    HH.I = 0.0*uA
-    net.run(50*ms, report='text')
+    #HH.I = 0.0*uA
+    #net.run(50*ms, report='text')
     
     HH.I = np.random.normal(60, 15, nb_neuron) * uA
     net.run(50*ms, report='text')
     
-    HH.I = 0.0*uA
-    net.run(50*ms, report='text')
+    #HH.I = 0.0*uA
+    #net.run(50*ms, report='text')
     
     # Returns the number of neurons, the monitors, and the synapses
     return nb_neuron, statemon, I_monitor, spikemon, S
