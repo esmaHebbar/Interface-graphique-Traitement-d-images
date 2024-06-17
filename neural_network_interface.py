@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 """
-Created on Wed Jun  5 10:29:16 2024
-@author: esma et guillaume
+Created on Jun 2024
+
+@authors : Demets Guillaume & Hebbar Esma
+
 """
+#--------------------------------------
 import sys
 import numpy as np
 import pyqtgraph as pg
@@ -12,10 +15,10 @@ from brian2 import *
 import random
 import matplotlib.pyplot as plt
 
-from simulate_hh import Calculer
-from analysis_graphs import calculate_mfr
+from simulate_hh import Simulate_hh
+nb_neuron, statemon, I_monitor, spikemon, S = Simulate_hh()
 
-nb_neuron, statemon, I_monitor, spikemon, S = Calculer()
+from analysis_graphs import Calculate_mfr, Calculate_isi
 
 #--------------------------------------
 # Configure the appearance of pyqtgraph
@@ -24,7 +27,7 @@ pg.setConfigOption('background', 'w')
 # Application and main window creation
 app = QApplication([])
 window = QMainWindow()
-window.setWindowTitle('Interface Graphique Modulaire')
+window.setWindowTitle('Modular Graphical Interface')
 
 # Tab configurations
 tab_widget = QTabWidget()
@@ -47,7 +50,7 @@ class InteractivePlotWidget(pg.PlotWidget):
             if points:
                 point = points[0]
                 point_data = point.data()
-                color = colors[point_data[1]]  # Récupérer la couleur en utilisant l'index du neurone
+                color = colors[point_data[1]]
                 point_data_with_color = (point_data, color)
                 self.pointClicked.emit(point_data_with_color)
                
@@ -56,24 +59,24 @@ class InteractivePlotWidget(pg.PlotWidget):
         super().mousePressEvent(event)
 
 #--------------------------------------
-# Tab 0 for the first page
+# First page : preferences
 #--------------------------------------
 
-tab0 = QWidget()
-tab_widget.addTab(tab0, "Préférences")
-tab0.layout = QVBoxLayout()
-tab0.setLayout(tab0.layout)
+tab_preferences = QWidget()
+tab_widget.addTab(tab_preferences, "Preferences")
+tab_preferences.layout = QVBoxLayout()
+tab_preferences.setLayout(tab_preferences.layout)
 
 # Button 1 in order to run HH model
-bouton1 = QPushButton("Run le modèle HH")
-bouton1.setMaximumWidth(200) 
-tab0.layout.addWidget(bouton1)
-bouton1.clicked.connect(Calculer)
+button_run = QPushButton("Run le modèle HH")
+button_run.setMaximumWidth(200) 
+tab_preferences.layout.addWidget(button_run)
+button_run.clicked.connect(Simulate_hh)
 
 # Button 2 pour importer des données
 bouton2 = QPushButton("Importer les données en .csv")
 bouton2.setMaximumWidth(200) 
-tab0.layout.addWidget(bouton2)
+tab_preferences.layout.addWidget(bouton2)
 
 def import_data():
     import csv
@@ -178,89 +181,42 @@ tab2.layout.addWidget(descriptive_data)
 plot2_widget.pointClicked.connect(on_point_clicked)
 
 #--------------------------------------
-# Third tab for Statistics
+#  Tab for stats
 #--------------------------------------
-#tab for stats
+
 tab_stats = QWidget()
 tab_widget.addTab(tab_stats, "Stats")
 tab_stats.layout = QVBoxLayout()
 tab_stats.setLayout(tab_stats.layout)
 
+#MFR
+# labels,hist_data=Calculate_mfr()
+
+
+# mfr_plot_widget = pg.PlotWidget()
+# tab_stats.layout.addWidget(mfr_plot_widget)
+
+# mfr_plot_widget.clear()
+# mfr_plot_widget.plot(labels, hist_data, stepMode=True, fillLevel=0, brush=(0, 0, 255, 150))
+# mfr_plot_widget.setLabel('left', 'Nombre de Spikes par Neurone')
+# mfr_plot_widget.setLabel('bottom', 'Histogramme et Courbe des Spikes par Intervalle de Temps')
+
+#ISI
+x,y=Calculate_isi()
+
 isi_plot_widget = pg.PlotWidget()
 tab_stats.layout.addWidget(isi_plot_widget)
 
-def plot_isi_histogram():
-    isi_plot_widget.clear()
-    isi_values = [] #contenant les valeurs des intervalles interspikes
-    
-    for m in range (nb_neuron):
-        spike_times = np.array(spikemon.t[spikemon.i == m]) / ms
-        
-        if len(spike_times) > 1:
-            # Calcul des intervalles interspikes
-            isi = np.diff(spike_times)
-            isi_values.extend(isi)  # ajout de isi dans isi_values
-    
-    if isi_values:
-        # Convertir la liste en un array numpy pour l'histogramme
-        isi_values = np.array(isi_values)
-        
-        # Création de l'histogramme
-        # y, x = np.histogram(isi_values, bins=np.linspace(0, max(isi_values)+1, num=int(max(isi_values)+1)//2 + 1))
-        bins = np.logspace(np.log10(min(isi_values)), np.log10(max(isi_values)), 50)  # Utilisez une échelle logarithmique pour les bins
-        y, x = np.histogram(isi_values, bins=bins)
+isi_plot_widget.clear()
+isi_plot_widget.plot(x, y, stepMode=True, fillLevel=0, brush=(0, 0, 255, 150))
+isi_plot_widget.setLabel('left', 'Nombre d\'intervalles')
+isi_plot_widget.setLabel('bottom', 'Intervalle interspikes (ms)')
 
-        isi_plot_widget.plot(x, y, stepMode=True, fillLevel=0, brush=(0, 0, 255, 150))
-        isi_plot_widget.setLabel('left', 'Nombre d\'intervalles')
-        isi_plot_widget.setLabel('bottom', 'Intervalle interspikes (ms)')
-        
-    else:
-        isi_plot_widget.setTitle("No sufficient spike data for ISI calculation")
-
-# update_isi_button = QPushButton("Update ISI Histogram")
-# tab_stats.layout.addWidget(update_isi_button)
-# update_isi_button.clicked.connect(plot_isi_histogram)
-
-
-# MFR_plot_widget = pg.PlotWidget()
-# tab_stats.layout.addWidget(MFR_plot_widget)
-
-# def MFR():
-#     duree_totale = 150  # en ms
-#     taille_intervalle = 5  # en ms
-
-#     # Générer les intervalles successifs de 1 ms
-#     intervalles = [(start, start + taille_intervalle) for start in range(0, duree_totale, taille_intervalle)]
-
-#     # Dictionnaire pour stocker les indices pour chaque intervalle
-#     resultats = {}
-
-#     # Parcourir chaque intervalle
-#     for intervalle_min, intervalle_max in intervalles:
-#         # Récupérer les indices correspondants aux temps dans l'intervalle courant
-#         indices_cibles = [i for t, i in zip(spikemon.t/ms, spikemon.i) if intervalle_min <= t < intervalle_max]
-#         # Stocker le résultat dans le dictionnaire
-#         resultats[f"{intervalle_min}-{intervalle_max}"] = indices_cibles
-
-#     # Préparer les données pour l'histogramme
-#     hist_data = []
-#     for intervalle, indices_cibles in resultats.items():
-#         hist_data.append(len(indices_cibles) / nb_neuron)  # Normaliser par le nombre de neurones
-
-#     # Générer les labels pour les intervalles
-#     labels = [f"{intervalle_min}" for intervalle_min, intervalle_max in intervalles]
-
-#     MFR_plot_widget.plot(labels, hist_data)
-#     MFR_plot_widget.setLabel('left', 'Fréquences de spikes')
-#     MFR_plot_widget.setLabel('bottom', 'Intervalle de temps (ms)')
-
-
-plot_isi_histogram()
-# MFR()
+#IBI
 
 
 #--------------------------------------
-#  tab for synapses
+#  Tab for synapses
 #--------------------------------------
 tab_synapses = QWidget()
 tab_widget.addTab(tab_synapses, "Synapse Connectivity")
@@ -291,30 +247,28 @@ def plot_synapses_histogram():
     p2.setLabel('bottom', 'Source neuron index')
     p2.setLabel('left', 'Target neuron index')
 
+# Button to export data
+button_synapses = QPushButton("Export data in .csv")
+button_synapses.setMaximumWidth(200) 
+tab_synapses.layout.addWidget(button_synapses)
 
-#     plot1_widget.plot(statemon.t/ms, statemon.v[i], pen=(i, nb_neuron))
-# plot1_widget.setLabel('left', 'Membrane potential (V)')
-# plot1_widget.setLabel('bottom', 'Time (ms)')
+button_synapses.clicked.connect(plot_synapses_histogram)
 
-    
+# plot_synapses_histogram()
 
-plot_synapses_histogram()
-
-
-#--------------------------------------
 
 #--------------------------------------
-# Fourth tab for data export
+# Tab for data export
 #--------------------------------------
-tab4 = QWidget()
-tab_widget.addTab(tab4, "Exporter")
-tab4.layout = QVBoxLayout()
-tab4.setLayout(tab4.layout)
+tab_export = QWidget()
+tab_widget.addTab(tab_export, "Export")
+tab_export.layout = QVBoxLayout()
+tab_export.setLayout(tab_export.layout)
 
 # Button to export data
-bouton_exporter = QPushButton("Exporter les données en .csv")
-bouton_exporter.setMaximumWidth(200) 
-tab4.layout.addWidget(bouton_exporter)
+button_export = QPushButton("Export data in .csv")
+button_export.setMaximumWidth(200) 
+tab_export.layout.addWidget(button_export)
 
 # Function to export data
 def export_data():
@@ -326,9 +280,10 @@ def export_data():
             writer.writerow([t, i])
     print("Data exported successfully!")
 
-bouton_exporter.clicked.connect(export_data)
+button_export.clicked.connect(export_data)
 
 #--------------------------------------
+
 # Show the main window and start the application
 window.show()
 app.exec_()

@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 """
-Created on Thu Jun 13 14:52:33 2024
+Created on Jun 2024
 
-@author: Guillaume
+@authors : Demets Guillaume & Hebbar Esma
 """
 import matplotlib.pyplot as plt
 from brian2 import *
-from simulate_hh import Calculer
+from simulate_hh import Simulate_hh
 
+nb_neuron, statemon, I_monitor, spikemon,S = Simulate_hh()
 
-def Calculer_MFR(nb_neuron,spikemon):
-
+def Calculate_mfr():
     duree_totale = 150  # en ms
     taille_intervalle = 5  # en ms
     
@@ -34,30 +34,31 @@ def Calculer_MFR(nb_neuron,spikemon):
     
     # Générer les labels pour les intervalles
     labels = [f"{intervalle_min}" for intervalle_min, intervalle_max in intervalles]
+    if intervalles:
+        labels.append(f"{intervalles[-1][1]}")  # Ajoute la limite supérieure du dernier intervalle
     
-    # Création de l'histogramme
-    fig, ax = plt.subplots(figsize=(12, 6))
-    ax.bar(labels, hist_data, width=0.8, color='blue', label='Histogramme des Spikes')
+    return labels, hist_data
+
+def Calculate_isi():
+    isi_values = [] #contenant les valeurs des intervalles interspikes
     
-    # Ajout de la courbe qui suit l'histogramme
-    ax.plot(labels, hist_data, color='red', linestyle='-', label='Courbe des Spikes')
+    for m in range (nb_neuron):
+        spike_times = np.array(spikemon.t[spikemon.i == m]) / ms
+        
+        if len(spike_times) > 1:
+            # Calcul des intervalles interspikes
+            isi = np.diff(spike_times)
+            isi_values.extend(isi)  # ajout de isi dans isi_values
     
-    # Configuration des axes et du titre
-    ax.set_xlabel('Intervalles de Temps (ms)')
-    ax.set_ylabel('Nombre de Spikes par Neurone')
-    ax.set_title('Histogramme et Courbe des Spikes par Intervalle de Temps')
-    ax.grid(axis='y')
-    
-    # Masquer les labels des ticks de l'axe des x
-    ax.set_xticklabels([])
-    
-    plt.tight_layout()
-    
-    # Ajout de la légende
-    ax.legend()
-    
-    # Affichage du graphique
-    plt.show()
+    if isi_values:
+        # Convertir la liste en un array numpy pour l'histogramme
+        isi_values = np.array(isi_values)
+        
+        # Création de l'histogramme
+        # y, x = np.histogram(isi_values, bins=np.linspace(0, max(isi_values)+1, num=int(max(isi_values)+1)//2 + 1))
+        bins = np.logspace(np.log10(min(isi_values)), np.log10(max(isi_values)), 50)  # Utilisez une échelle logarithmique pour les bins
+        y, x = np.histogram(isi_values, bins=bins)
+    return x,y
 
 
 # Appeler la fonction pour obtenir les données
