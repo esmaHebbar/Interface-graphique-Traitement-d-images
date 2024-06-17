@@ -220,42 +220,41 @@ def plot_isi_histogram():
 # tab_stats.layout.addWidget(update_isi_button)
 # update_isi_button.clicked.connect(plot_isi_histogram)
 
+# def MFR():
+#     duree_totale = 150  # en ms
+#     taille_intervalle = 5  # en ms
 
-MFR_plot_widget = pg.PlotWidget()
-tab_stats.layout.addWidget(MFR_plot_widget)
+#     # Générer les intervalles successifs de 1 ms
+#     intervalles = [(start, start + taille_intervalle) for start in range(0, duree_totale, taille_intervalle)]
 
-def MFR():
-    duree_totale = 150  # en ms
-    taille_intervalle = 5  # en ms
+#     # Dictionnaire pour stocker les indices pour chaque intervalle
+#     resultats = {}
 
-    # Générer les intervalles successifs de 1 ms
-    intervalles = [(start, start + taille_intervalle) for start in range(0, duree_totale, taille_intervalle)]
+#     # Parcourir chaque intervalle
+#     for intervalle_min, intervalle_max in intervalles:
+#         # Récupérer les indices correspondants aux temps dans l'intervalle courant
+#         indices_cibles = [i for t, i in zip(spikemon.t/ms, spikemon.i) if intervalle_min <= t < intervalle_max]
+#         # Stocker le résultat dans le dictionnaire
+#         resultats[f"{intervalle_min}-{intervalle_max}"] = indices_cibles
 
-    # Dictionnaire pour stocker les indices pour chaque intervalle
-    resultats = {}
+#     # Préparer les données pour l'histogramme
+#     hist_data = []
+#     for intervalle, indices_cibles in resultats.items():
+#         hist_data.append(len(indices_cibles) / nb_neuron)  # Normaliser par le nombre de neurones
 
-    # Parcourir chaque intervalle
-    for intervalle_min, intervalle_max in intervalles:
-        # Récupérer les indices correspondants aux temps dans l'intervalle courant
-        indices_cibles = [i for t, i in zip(spikemon.t/ms, spikemon.i) if intervalle_min <= t < intervalle_max]
-        # Stocker le résultat dans le dictionnaire
-        resultats[f"{intervalle_min}-{intervalle_max}"] = indices_cibles
+#     # Générer les labels pour les intervalles
+#     labels = [f"{intervalle_min}" for intervalle_min, intervalle_max in intervalles]
 
-    # Préparer les données pour l'histogramme
-    hist_data = []
-    for intervalle, indices_cibles in resultats.items():
-        hist_data.append(len(indices_cibles) / nb_neuron)  # Normaliser par le nombre de neurones
-
-    # Générer les labels pour les intervalles
-    labels = [f"{intervalle_min}" for intervalle_min, intervalle_max in intervalles]
-
-    MFR_plot_widget.plot(labels, hist_data)
-    MFR_plot_widget.setLabel('left', 'Fréquences de spikes')
-    MFR_plot_widget.setLabel('bottom', 'Intervalle de temps (ms)')
+#     MFR_plot_widget.plot(labels, hist_data)
+#     MFR_plot_widget.setLabel('left', 'Fréquences de spikes')
+#     MFR_plot_widget.setLabel('bottom', 'Intervalle de temps (ms)')
 
 
 plot_isi_histogram()
-MFR()
+
+# MFR_plot_widget = pg.PlotWidget()
+# tab_stats.layout.addWidget(MFR_plot_widget)
+# MFR()
 
 
 #--------------------------------------
