@@ -12,7 +12,7 @@ from brian2 import *
 import random
 import matplotlib.pyplot as plt
 
-from HH_model import Calculer
+from simulate_hh import Calculer
 
 nb_neuron, statemon, I_monitor, spikemon, S = Calculer()
 
