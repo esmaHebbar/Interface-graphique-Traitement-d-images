@@ -153,7 +153,6 @@ details_plot = pg.PlotWidget()
 details_layout.addWidget(details_plot)
 
 def on_point_clicked(data_with_color):
-    print("data",data_with_color)
     if data_with_color[0]==None:
         descriptive_data.append("Aucun point de données n'a été cliqué.\n")
         return
@@ -202,9 +201,10 @@ mfr_plot_widget = pg.PlotWidget()
 tab_stats.layout.addWidget(mfr_plot_widget)
 
 mfr_plot_widget.clear()
-mfr_plot_widget.plot(labels, hist_data, stepMode=True, fillLevel=0, brush=(0, 0, 255, 150))
-mfr_plot_widget.setLabel('left', 'Nombre de Spikes par Neurone')
-mfr_plot_widget.setLabel('bottom', 'Histogramme et Courbe des Spikes par Intervalle de Temps')
+mfr_plot_widget.plot(labels, hist_data, stepMode=False, fillLevel=0, brush=(0, 0, 255, 150))
+mfr_plot_widget.setLabel('left', 'Nombre de Spikes par Secondes (Hz)')
+mfr_plot_widget.setLabel('bottom', 'Temps (ms)')
+mfr_plot_widget.setTitle('Mean Firing Rate Network (MFR)')  # Ajouter un titre au graphique
 
 # ISI
 x,y=Calculate_isi(nb_neuron,spikemon)
@@ -216,6 +216,8 @@ isi_plot_widget.clear()
 isi_plot_widget.plot(x, y, stepMode=True, fillLevel=0, brush=(0, 0, 255, 150))
 isi_plot_widget.setLabel('left', 'Nombre d\'intervalles')
 isi_plot_widget.setLabel('bottom', 'Intervalle interspikes (ms)')
+isi_plot_widget.setTitle('Inter Spike Interval (ISI)')  # Ajouter un titre au graphique
+
 
 # IBI
 # TODO
@@ -277,7 +279,7 @@ def export_data():
 button_export.clicked.connect(export_data)
 
 #--------------------------------------
-
 # Show the main window and start the application
+#--------------------------------------
 window.show()
 app.exec_()
