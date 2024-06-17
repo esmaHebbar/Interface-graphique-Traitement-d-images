@@ -1,18 +1,16 @@
 """
 Created on Mon Jun 10 10:14:08 2024
-
 @author: Guillaume et Esma
 """
 
 import numpy as np
 from brian2 import *
-import matplotlib.pyplot as plt
 
 def Calculer():
     defaultclock.dt = 0.01*ms
     
     # Number of neurons in the group
-    nb_neuron=10
+    nb_neuron = 10
     
     # Hodgkin-Huxley model parameters
     Cm = 1.0*ufarad # Membrane capacitance
@@ -28,7 +26,7 @@ def Calculer():
     # Differential equations for the Hodgkin-Huxley model
     eqs = '''
     dv/dt = (I+I_noise - gl * (v-El) - gNa * m**3 * h * (v-ENa) - gK * n**4 * (v-EK))/Cm : volt
-    I : amp (constant)  # Courant appliqué
+    I : amp (constant)  # Applied current
     
     dn/dt = alphan * (1-n) - betan * n : 1
     dm/dt = alpham * (1-m) - betam * m : 1
@@ -62,8 +60,9 @@ def Calculer():
     HH.gl = gl0
     
     # Add random noise to the current
-    I_noise=np.random.normal(0.1,0.1)*uA 
-    # I_noise=np.random.normal(10,10)*uA 
+    I_noise = np.random.normal(0.1, 0.1)*uA 
+    S = Synapses(HH, HH, on_pre='v_post += 0.2*mV')
+    S.connect(p=0.05, condition='i != j')
     
     # Record state variables and spikes
     statemon = StateMonitor(HH, True, record=True)
@@ -75,20 +74,14 @@ def Calculer():
     
     # Simulation with different applied currents
     HH.I = 0.0*uA
-    net.run(500*ms, report='text')
+    net.run(50*ms, report='text')
     
-    HH.I = np.random.normal(60, 5, nb_neuron) * uA
-    net.run(500*ms, report='text')
+    HH.I = np.random.normal(60, 15, nb_neuron) * uA
+    net.run(50*ms, report='text')
     
     HH.I = 0.0*uA
-    net.run(500*ms, report='text')
+    net.run(50*ms, report='text')
     
-    # Returns the number of neurons and the monitors
-    return nb_neuron, statemon, I_monitor, spikemon
-
-def Calculer_MFR():
-    a=0
-    return a
-
-
+    # Returns the number of neurons, the monitors, and the synapses
+    return nb_neuron, statemon, I_monitor, spikemon, S
 
