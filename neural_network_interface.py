@@ -12,7 +12,11 @@ from brian2 import *
 import random
 
 from HH_model import Calculer
+from synapses import Calculer_synapses
 
+from brian2 import BrianLogger
+BrianLogger.log_level_debug()
+ 
 nb_neuron, statemon, I_monitor, spikemon = Calculer()
 
 # Configure the appearance of pyqtgraph
@@ -103,7 +107,9 @@ plot1_widget.setLabel('left', 'Membrane potential (V)')
 plot1_widget.setLabel('bottom', 'Time (ms)')
 plot3_widget = pg.PlotWidget()
 tab1.layout.addWidget(plot3_widget)
-plot3_widget.plot(statemon.t/ms, statemon.I[0]/uA, pen='r')
+for i in range (nb_neuron):
+    plot3_widget.plot(statemon.t/ms,statemon.I[i]/uA, pen=(i,nb_neuron))
+# plot3_widget.plot(statemon.t/ms, statemon.I[0]/uA, pen='r')
 plot3_widget.setLabel('left', 'Currents (uA)')
 plot3_widget.setLabel('bottom', 'Time (ms)')
 plot1_widget.showGrid(x=True, y=True, alpha=0.3)
@@ -197,6 +203,51 @@ def export_data():
     print("Data exported successfully!")
 
 bouton_exporter.clicked.connect(export_data)
+
+#--------------------------------------
+
+#tab for stats
+tab_stats = QWidget()
+tab_widget.addTab(tab_stats, "Stats")
+tab_stats.layout = QVBoxLayout()
+tab_stats.setLayout(tab_stats.layout)
+
+isi_plot_widget = pg.PlotWidget()
+tab_stats.layout.addWidget(isi_plot_widget)
+
+def plot_isi_histogram():
+    isi_plot_widget.clear()
+    isi_values = [] #contenant les valeurs des intervalles interspikes
+    
+    for m in range (nb_neuron):
+        spike_times = np.array(spikemon.t[spikemon.i == m]) / ms
+        
+        if len(spike_times) > 1:
+            # Calcul des intervalles interspikes
+            isi = np.diff(spike_times)
+            isi_values.extend(isi)  # ajout de isi dans isi_values
+    
+    if isi_values:
+        # Convertir la liste en un array numpy pour l'histogramme
+        isi_values = np.array(isi_values)
+        
+        # Création de l'histogramme
+        # y, x = np.histogram(isi_values, bins=np.linspace(0, max(isi_values)+1, num=int(max(isi_values)+1)//2 + 1))
+        bins = np.logspace(np.log10(min(isi_values)), np.log10(max(isi_values)), 50)  # Utilisez une échelle logarithmique pour les bins
+        y, x = np.histogram(isi_values, bins=bins)
+
+        isi_plot_widget.plot(x, y, stepMode=True, fillLevel=0, brush=(0, 0, 255, 150))
+        isi_plot_widget.setLabel('left', 'Nombre d\'intervalles')
+        isi_plot_widget.setLabel('bottom', 'Intervalle interspikes (ms)')
+        
+    else:
+        isi_plot_widget.setTitle("No sufficient spike data for ISI calculation")
+
+# update_isi_button = QPushButton("Update ISI Histogram")
+# tab_stats.layout.addWidget(update_isi_button)
+# update_isi_button.clicked.connect(plot_isi_histogram)
+
+plot_isi_histogram()
 
 #--------------------------------------
 

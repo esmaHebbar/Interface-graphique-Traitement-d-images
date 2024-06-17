@@ -1,18 +1,19 @@
 """
-Created on Mon Jun 10 10:14:08 2024
+Created on Fri Jun 14 09:46:49 2024
 
-@author: Guillaume et Esma
+@authors: esma and guillaume
 """
 
 import numpy as np
 from brian2 import *
 import matplotlib.pyplot as plt
 
-def Calculer():
+
+def Calculer_synapses():
     defaultclock.dt = 0.01*ms
     
     # Number of neurons in the group
-    nb_neuron=10
+    nb_neuron_s=5
     
     # Hodgkin-Huxley model parameters
     Cm = 1.0*ufarad # Membrane capacitance
@@ -51,6 +52,19 @@ def Calculer():
     # Create a group of neurons with the defined equations
     HH = NeuronGroup(nb_neuron, eqs, threshold='v>20*mV', refractory=3*ms, method='rk4')
     
+    P = NeuronGroup(nb_neuron, eqs, threshold='v>20*mV', refractory=3*ms, method='rk4')
+    Q = NeuronGroup(nb_neuron, eqs, threshold='v>20*mV', refractory=3*ms, method='rk4')
+    
+    P.I = [2, 0]
+    P.tau = [10, 100]*ms
+    Q.I = [2, 0]
+    Q.tau = [10, 100]*ms
+
+    
+    w = 1*mV
+    S = Synapses(P, Q, on_pre='v += w')# does not create synapses, it only specifies their dynamics
+    #S = Synapses(P, Q, model='w : volt', on_pre='v += w')
+
     # Initialization of variables
     HH.v = El
     HH.h = 0.75
@@ -63,16 +77,24 @@ def Calculer():
     
     # Add random noise to the current
     I_noise=np.random.normal(0.1,0.1)*uA 
-    # I_noise=np.random.normal(10,10)*uA 
     
     # Record state variables and spikes
-    statemon = StateMonitor(HH, True, record=True)
-    I_monitor = StateMonitor(HH, 'I', record=True)
-    spikemon = SpikeMonitor(HH)
+    statemon_s = StateMonitor(HH, True, record=True)
+    I_monitor_s = StateMonitor(HH, 'I', record=True)
+    spikemon_s = SpikeMonitor(HH)
     
     # Create a Network object and add simulation objects to it
     net = Network(HH, statemon, spikemon, I_monitor)
     
+    # 1-to-1 connection :
+    S.connect(j='i')
+    #creates a synapse between neuron 5 in the source group and neuron 10 in the target group :
+    #S.connect(i=5, j=10)
+#   S.connect() #connects all neuron pairs.
+#   S.connect(i=[1, 2], j=[3, 4])#synapses between neurons 1 and 3, and between neurons 2 and 4
+#   S.connect(i=numpy.arange(10), j=1)#synapses between the first ten neurons in the source group and neuron 1 in the target group
+    
+
     # Simulation with different applied currents
     HH.I = 0.0*uA
     net.run(500*ms, report='text')
@@ -84,11 +106,6 @@ def Calculer():
     net.run(500*ms, report='text')
     
     # Returns the number of neurons and the monitors
-    return nb_neuron, statemon, I_monitor, spikemon
-
-def Calculer_MFR():
-    a=0
-    return a
-
+    return nb_neuron_s, statemon_s, I_monitor_s, spikemon_s
 
 
