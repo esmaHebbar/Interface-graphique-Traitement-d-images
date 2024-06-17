@@ -15,11 +15,9 @@ from brian2 import *
 import random
 import matplotlib.pyplot as plt
 
-<<<<<<< HEAD
 from simulate_hh import Calculer
 from calculate_mfr
-=======
->>>>>>> 7cf2308f5a8c465c84ab31c3c3f91133c1da1bc3
+
 
 from simulate_hh import Simulate_hh
 nb_neuron, statemon, I_monitor, spikemon, S = Simulate_hh()

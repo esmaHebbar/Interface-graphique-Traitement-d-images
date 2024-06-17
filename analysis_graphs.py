@@ -39,11 +39,6 @@ def Calculate_mfr():
     
     return labels, hist_data
 
-
-
-
-
-
 def Calculate_isi():
     isi_values = [] #contenant les valeurs des intervalles interspikes
     
@@ -64,6 +59,8 @@ def Calculate_isi():
         bins = np.logspace(np.log10(min(isi_values)), np.log10(max(isi_values)), 50)  # Utilisez une échelle logarithmique pour les bins
         y, x = np.histogram(isi_values, bins=bins)
     return x,y
-        
 
 
+# Appeler la fonction pour obtenir les données
+nb_neuron, statemon, I_monitor, spikemon,S = Calculer()
+Calculer_MFR(nb_neuron,spikemon)
