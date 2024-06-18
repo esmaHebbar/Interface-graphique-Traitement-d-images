@@ -55,3 +55,17 @@ def Calculate_isi(nb_neuron,spikemon):
         
 
 
+def Calculate_active_neurons(nb_neuron, spikemon):
+    spike_counts = [np.sum(spikemon.i == neuron_idx) for neuron_idx in range(nb_neuron)]
+    simulation_time = np.max(spikemon.t/ms) - np.min(spikemon.t/ms)
+    mfr = [count / simulation_time * 1000 for count in spike_counts]  # Conversion en Hz (spikes/s)
+    
+    active_neurons = sorted([(i, mfr[i]) for i in range(nb_neuron)], key=lambda x: x[1], reverse=True)
+    
+    return active_neurons
+    
+    
+    
+    
+    
+    

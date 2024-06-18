@@ -17,12 +17,13 @@ import matplotlib.pyplot as plt
 
 from PyQt5.QtWidgets import QApplication, QMainWindow, QTabWidget, QWidget, QVBoxLayout, QTextEdit, QPushButton, QFileDialog
 from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtWidgets import QLabel
 from brian2 import *
 from random import randint
 
 
 from simulate_hh import Simulate_hh
-from analysis_graphs import Calculate_mfr, Calculate_isi
+from analysis_graphs import Calculate_mfr, Calculate_isi, Calculate_active_neurons
 
 #--------------------------------------
 # Configure the appearance of pyqtgraph
@@ -113,7 +114,7 @@ tab_widget.addTab(tab_oscilloscope, "Oscilloscope")
 tab_oscilloscope.layout = QVBoxLayout()
 tab_oscilloscope.setLayout(tab_oscilloscope.layout)
 
-#first graph : mambrane potential as a function of time
+#first graph : membrane potential as a function of time
 plot_scatterplot = pg.PlotWidget()
 tab_oscilloscope.layout.addWidget(plot_scatterplot)
 
@@ -236,6 +237,24 @@ isi_plot_widget.setLabel('bottom', 'Interspike interval (ms)')
 
 #IBI
 # TODO
+
+#--------------------------------------
+#  Tab for some data (simple functions)
+#--------------------------------------
+
+tab_active_neurons = QWidget()
+tab_widget.addTab(tab_active_neurons, "Active neurons")
+tab_active_neurons.layout = QVBoxLayout()
+tab_active_neurons.setLayout(tab_active_neurons.layout)
+
+#actives neurons
+active_neurons = Calculate_active_neurons(nb_neuron,spikemon)
+
+data_label = QLabel()
+data_text = "Neurones les plus actifs par ordre décroissant :\n"
+data_text += "\n".join([f"Neurone {idx} : {rate:.4f} Hz" for idx, rate in active_neurons])
+data_label.setText(data_text)
+tab_active_neurons.layout.addWidget(data_label)
 
 #--------------------------------------
 #  Tab for synapses
