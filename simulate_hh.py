@@ -12,7 +12,7 @@ def Simulate_hh():
     defaultclock.dt = 0.01*ms
     
     # Number of neurons in the group
-    nb_neuron = 100
+    nb_neuron = 10
     
     # Hodgkin-Huxley model parameters
     Cm = 1.0*ufarad # Membrane capacitance
