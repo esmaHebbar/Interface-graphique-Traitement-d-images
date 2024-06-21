@@ -210,17 +210,20 @@ tab_widget.addTab(tab_stats, "Stats")
 tab_stats.layout = QVBoxLayout()
 tab_stats.setLayout(tab_stats.layout)
 
-# MFR
-labels,hist_data=Calculate_mfr(nb_neuron,spikemon)
-labels = [int(label) for label in labels]
+index, data = Calculate_mfr(nb_neuron, spikemon)
+
+# Créer le widget de tracé avec PyQtGraph
 mfr_plot_widget = pg.PlotWidget()
 tab_stats.layout.addWidget(mfr_plot_widget)
 
-mfr_plot_widget.clear()
-mfr_plot_widget.plot(labels, hist_data, stepMode=False, fillLevel=0, brush=(0, 0, 255, 150))
+# Créer l'élément BarGraphItem et l'ajouter au PlotWidget
+bar_graph = pg.BarGraphItem(x=index, height=data, width=0.6, brush='b')
+mfr_plot_widget.addItem(bar_graph)
+
+# Définir les étiquettes des axes et le titre du graphique
 mfr_plot_widget.setLabel('left', 'Nombre de Spikes par Secondes (Hz)')
 mfr_plot_widget.setLabel('bottom', 'Temps (ms)')
-mfr_plot_widget.setTitle('Mean Firing Rate Network (MFR)')  # Ajouter un titre au graphique
+mfr_plot_widget.setTitle('Mean Firing Rate Network (MFR)')
 
 # ISI
 x,y=Calculate_isi(nb_neuron,spikemon)

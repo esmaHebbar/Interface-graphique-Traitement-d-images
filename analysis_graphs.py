@@ -5,28 +5,19 @@ Created on Jun 2024
 @authors : Demets Guillaume & Hebbar Esma
 """
 from brian2 import *
+import numpy as np
 
 def Calculate_mfr(nb_neuron,spikemon):
     # Convert spike times to milliseconds
-    spike_times_ms = spikemon.t / ms
+    spike_index=spikemon.i
+    index=np.arange(1,nb_neuron,1)
+    res=np.zeros(nb_neuron-1)
 
-    # Define duration and result arrays
-    duree = range(0, 151, 1)
-    res = [0] * len(duree)
-
-    # Iterate over time bins
-    for i, time_bin in enumerate(duree):
-        count = 0
-        for spike_time in spike_times_ms:
-            if time_bin <= spike_time < time_bin + 1:
-                count += 1
-        res[i] = count
-    if count > 0:
-        res[i] = count / 1.0  # Divide count by bin width (1 ms) to get rate in Hz
-    else:
-        res[i] = 0  # No spikes in this time bin
-
-    return duree, res
+    for i in range(nb_neuron-1):
+        for j in range(len(spike_index)-1):
+            if(spike_index[j]==i):
+                res[i] += 1
+    return index, res
 
 def Calculate_isi(nb_neuron,spikemon):
     isi_values = [] #contenant les valeurs des intervalles interspikes

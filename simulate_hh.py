@@ -12,7 +12,7 @@ def Simulate_hh():
     defaultclock.dt = 0.01*ms
     
     # Number of neurons in the group
-    nb_neuron = 10
+    nb_neuron = 100
     
     # Hodgkin-Huxley model parameters
     Cm = 1.0*ufarad # Membrane capacitance
@@ -64,7 +64,7 @@ def Simulate_hh():
     # Add random noise to the current
     I_noise = np.random.normal(0.1, 0.1)*uA 
     S = Synapses(HH, HH, on_pre='v_post += 0.2*mV')
-    S.connect(p=0.05, condition='i != j')
+    S.connect(p=0.015, condition='i != j')
     
     # Record state variables and spikes
     statemon = StateMonitor(HH, True, record=True)
@@ -78,7 +78,9 @@ def Simulate_hh():
     HH.I = 0.0*uA
     net.run(10*ms, report='text')
     
-    HH.I = np.random.normal(60, 2.5, nb_neuron) * uA
+    HH.I = np.random.normal(60, 1.5, nb_neuron) * uA
+    #HH.I = 60 * uA
+
     net.run(50*ms, report='text')
     
     HH.I = 0.0*uA
