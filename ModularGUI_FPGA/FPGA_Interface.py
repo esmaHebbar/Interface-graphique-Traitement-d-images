@@ -4,7 +4,7 @@ import zmq
 import sys
 import pyqtgraph as pg
 import numpy as np
-from config import *
+from ModularGUI_FPGA.config import *
 
 class Interface(QMainWindow):
     def __init__(self):
