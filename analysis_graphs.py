@@ -6,8 +6,6 @@ Created on Jun 2024
 """
 from brian2 import *
 
-
-
 def Calculate_mfr(nb_neuron,spikemon):
     # Convert spike times to milliseconds
     spike_times_ms = spikemon.t / ms
@@ -30,8 +28,6 @@ def Calculate_mfr(nb_neuron,spikemon):
 
     return duree, res
 
-
-
 def Calculate_isi(nb_neuron,spikemon):
     isi_values = [] #contenant les valeurs des intervalles interspikes
     
@@ -52,8 +48,6 @@ def Calculate_isi(nb_neuron,spikemon):
         bins = np.logspace(np.log10(min(isi_values)), np.log10(max(isi_values)), 50)  # Utilisez une échelle logarithmique pour les bins
         y, x = np.histogram(isi_values, bins=bins)
     return x,y
-        
-
 
 def Calculate_active_neurons(nb_neuron, spikemon):
     spike_counts = [np.sum(spikemon.i == neuron_idx) for neuron_idx in range(nb_neuron)]
@@ -63,9 +57,4 @@ def Calculate_active_neurons(nb_neuron, spikemon):
     active_neurons = sorted([(i, mfr[i]) for i in range(nb_neuron)], key=lambda x: x[1], reverse=True)
     
     return active_neurons
-    
-    
-    
-    
-    
-    
+     

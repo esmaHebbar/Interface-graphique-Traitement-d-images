@@ -223,7 +223,6 @@ mfr_plot_widget.setLabel('left', 'Nombre de Spikes par Secondes (Hz)')
 mfr_plot_widget.setLabel('bottom', 'Temps (ms)')
 mfr_plot_widget.setTitle('Mean Firing Rate Network (MFR)')  # Ajouter un titre au graphique
 
-
 #ISI
 x,y=Calculate_isi(nb_neuron,spikemon)
 
@@ -234,9 +233,6 @@ isi_plot_widget.clear()
 isi_plot_widget.plot(x, y, stepMode=True, fillLevel=0, brush=(0, 0, 255, 150))
 isi_plot_widget.setLabel('left', 'Number of intervals')
 isi_plot_widget.setLabel('bottom', 'Interspike interval (ms)')
-
-#IBI
-# TODO
 
 #--------------------------------------
 #  Tab for some data (simple functions)
