@@ -4,6 +4,7 @@ import zmq
 import pyqtgraph as pg
 import numpy as np
 from config import *
+from filter import butter_bandpass_filter
 
 class Interface(QMainWindow):
     def __init__(self):
@@ -127,6 +128,9 @@ class Interface(QMainWindow):
         self.timestamps.append(self.interval[0])
         self.total_spikes.append(res)
 
+        fs = 256.0  # Supposons une fréquence d'échantillonnage de 256 Hz
+        filtered_x = butter_bandpass_filter(np.array(self.total_spikes), 8, 12, fs, order=6)  # Filtrer les données
+        print(filtered_x)
         self.plot_widget2.plot(self.timestamps, self.total_spikes, clear=True)  
         self.plot_widget2.update()
 
