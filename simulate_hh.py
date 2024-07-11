@@ -66,7 +66,7 @@ def Simulate_hh():
     # I_noise = np.random.normal(0.1, 0.1)*uA
     I_noise = np.random.normal(0.02, 0.01)*uA  
     S = Synapses(HH, HH, on_pre='v_post += 0.2*mV')
-    S.connect(p=0.05, condition='i != j')
+    S.connect(p=0.015, condition='i != j')
     
     # Record state variables and spikes
     statemon = StateMonitor(HH, True, record=True)
@@ -80,8 +80,8 @@ def Simulate_hh():
     HH.I = 0.0*uA
     net.run(10*ms, report='text')
     
-    # HH.I = np.random.normal(60, 15, nb_neuron) * uA
-    HH.I = np.random.normal(5, 2, nb_neuron) * uA  # Réduire le courant moyen à 5 µA avec une SD de 2 µA
+    HH.I = np.random.normal(60, 2.5, nb_neuron) * uA
+    #HH.I = 60 * uA
 
     net.run(50*ms, report='text')
     
