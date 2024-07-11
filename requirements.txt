@@ -1,0 +1,6 @@
+PyQt5
+zmq
+pyqtgraph
+numpy
+scipy
+brian2
