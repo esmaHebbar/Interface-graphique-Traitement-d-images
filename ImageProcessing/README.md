@@ -18,9 +18,9 @@ Le fichier Excel `data_image.xlsx` est chargé et converti en un tableau numpy. 
 
 - **find_most_active_zones(image, threshold, grid_size)** : Trouve et retourne les coordonnées des zones les plus actives parmi les zones définies par la grille.
 
-## Résultats avec différents seuils
+## Résultats pour différents seuils
 
-### Détection zones d'activation
+### Détection des zones d'activation
 
 #### Seuil 2.2
 ![Zones d'activation seuil 2.2](./ExampleResults/actives_zones_threshold_2.2.png)
@@ -31,7 +31,7 @@ Le fichier Excel `data_image.xlsx` est chargé et converti en un tableau numpy. 
 #### Seuil 2.7
 ![Zones d'activation seuil 2.7](./ExampleResults/actives_zones_threshold_2.7.png)
 
-### Contours
+### Contours des zones les plus actives
 
 #### Seuil 2.2
 ![Contours seuil 2.2](./ExampleResults/contours_threshold_2.2.png)
