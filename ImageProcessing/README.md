@@ -8,7 +8,7 @@ Ce folder contient des fonctions pour le traitement d'image, en particulier pour
 
 Le fichier Excel `data_image.xlsx` est chargé et converti en un tableau numpy. Ce fichier exemple contient les données d'une image en teintes de gris représentant un réseau neuronal.
 
-![Exemple d'image](ImageProcessing\ExampleResults\image_originale_nuances_de_gris.png)
+![Exemple d'image](./ExampleResults/image_originale_nuances_de_gris.png)
 
 ### Fonctions principales
   
@@ -23,21 +23,21 @@ Le fichier Excel `data_image.xlsx` est chargé et converti en un tableau numpy. 
 ### Détection zones d'activation
 
 #### Seuil 2.2
-![Zones d'activation seuil 2.2](ImageProcessing\ExampleResults\actives_zones_threshold_2.2.png)
+![Zones d'activation seuil 2.2](./ExampleResults/actives_zones_threshold_2.2.png)
 
 #### Seuil 2.4
-![Zones d'activation seuil 2.4](ImageProcessing\ExampleResults\actives_zones_threshold_2.4.png)
+![Zones d'activation seuil 2.4](./ExampleResults/actives_zones_threshold_2.4.png)
 
 #### Seuil 2.7
-![Zones d'activation seuil 2.7](ImageProcessing\ExampleResults\actives_zones_threshold_2.7.png)
+![Zones d'activation seuil 2.7](./ExampleResults/actives_zones_threshold_2.7.png)
 
 ### Contours
 
 #### Seuil 2.2
-![Contours seuil 2.2](ImageProcessing\ExampleResults\contours_threshold_2.2.png)
+![Contours seuil 2.2](./ExampleResults/contours_threshold_2.2.png)
 
 #### Seuil 2.4
-![Contours seuil 2.4](ImageProcessing\ExampleResults\contours_threshold_2.4.png)
+![Contours seuil 2.4](./ExampleResults/contours_threshold_2.4.png)
 
 #### Seuil 2.7
-![Contours seuils 2.7](ImageProcessing\ExampleResults\contours_threshold_2.7.png)
+![Contours seuils 2.7](./ExampleResults/contours_threshold_2.7.png)
