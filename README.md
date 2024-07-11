@@ -50,7 +50,7 @@ Pour installer les dépendances nécessaires, vous pouvez utiliser le fichier `r
 pip install -r requirements.txt
 ```
 
-## Contact
+## Contacts
 
 - Guillaume Demets : gdemets@ensc.fr
 - Esma Hebbar : ehebbar001@ensc.fr
