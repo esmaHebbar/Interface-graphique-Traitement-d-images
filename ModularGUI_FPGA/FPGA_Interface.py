@@ -53,10 +53,17 @@ class Interface(QMainWindow):
         pg.setConfigOption('background', 'w')
         self.plot_widget2 = pg.PlotWidget()
         self.layout.addWidget(self.plot_widget2)
-        self.plot_sum = pg.PlotItem(symbol="+")
-        self.plot_widget2.addItem(self.plot_sum)
         self.plot_widget2.setLabel('left', 'Fréquence de décharge')
         self.plot_widget2.setLabel('bottom', 'Indice du neurone')
+        self.curve_total_spikes = self.plot_widget2.plot(pen='b', name="Total Spikes")
+
+        ### Signal Plot ###
+        pg.setConfigOption('background', 'w')
+        self.plot_widget3 = pg.PlotWidget()
+        self.layout.addWidget(self.plot_widget3)
+        self.plot_widget3.setLabel('left', 'Fréquence de décharge')
+        self.plot_widget3.setLabel('bottom', 'Indice du neurone')
+        self.curve_filtered_spikes = self.plot_widget3.plot(pen='r', name="Filtered Spikes")
 
         ### Initialisation de ZeroMQ ###
         self.context = zmq.Context()
@@ -128,21 +135,13 @@ class Interface(QMainWindow):
         self.timestamps.append(self.interval[0])
         self.total_spikes.append(res)
 
-        fs = 256.0  # Supposons une fréquence d'échantillonnage de 256 Hz
-        filtered_x = butter_bandpass_filter(np.array(self.total_spikes), 8, 12, fs, order=6)  # Filtrer les données
-        print(filtered_x)
-        self.plot_widget2.plot(self.timestamps, self.total_spikes, clear=True)  
-        self.plot_widget2.update()
+        filtered_x = butter_bandpass_filter(self.total_spikes, 8, 12, 256.0, order=6) 
+
+        self.curve_total_spikes.setData(self.timestamps, self.total_spikes)
+        self.curve_filtered_spikes.setData(self.timestamps, filtered_x)
 
 if __name__ == '__main__':
     app = QApplication([])
     window = Interface()
     window.show()
     app.exec()
-
-# tps = np.mean(x)
-# nb = len(x)
-# self.timestamps.append(tps)
-# self.total_spikes.append(nb)
-# ### MAJ du graph ###
-# self.plot_sum.setData(self.timestamps, self.total_spikes)
