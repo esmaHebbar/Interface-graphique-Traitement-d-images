@@ -78,7 +78,7 @@ def Simulate_hh():
     HH.I = 0.0*uA
     net.run(10*ms, report='text')
     
-    HH.I = np.random.normal(60, 1.5, nb_neuron) * uA
+    HH.I = np.random.normal(60, 2.5, nb_neuron) * uA
     #HH.I = 60 * uA
 
     net.run(50*ms, report='text')

@@ -222,7 +222,7 @@ mfr_plot_widget.addItem(bar_graph)
 
 # Définir les étiquettes des axes et le titre du graphique
 mfr_plot_widget.setLabel('left', 'Nombre de Spikes par Secondes (Hz)')
-mfr_plot_widget.setLabel('bottom', 'Temps (ms)')
+mfr_plot_widget.setLabel('bottom', 'Numéro du neurone')
 mfr_plot_widget.setTitle('Mean Firing Rate Network (MFR)')
 
 # ISI
