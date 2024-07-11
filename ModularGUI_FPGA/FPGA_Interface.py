@@ -1,10 +1,9 @@
 from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QPushButton, QLineEdit, QHBoxLayout
 from PyQt5.QtCore import QTimer
 import zmq
-import sys
 import pyqtgraph as pg
 import numpy as np
-from ModularGUI_FPGA.config import *
+from config import *
 
 class Interface(QMainWindow):
     def __init__(self):
