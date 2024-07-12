@@ -64,7 +64,7 @@ class Interface(QMainWindow):
         self.plot_widget3 = pg.PlotWidget()
         self.layout.addWidget(self.plot_widget3)
         self.plot_widget3.setTitle("Filtrage du signal",color="k")
-        self.plot_widget3.setLabel('left', 'Fréquence (Hz)')
+        self.plot_widget3.setLabel('left', 'Amplitude')
         self.plot_widget3.setLabel('bottom', 'Temps (ms)')
         self.curve_filtered_spikes = self.plot_widget3.plot(pen='r', name="Filtered Spikes")
 
@@ -138,7 +138,7 @@ class Interface(QMainWindow):
         self.timestamps.append(self.interval[0])
         self.total_spikes.append(res)
 
-        filtered_x = butter_bandpass_filter(self.total_spikes, 8, 12, 256.0, order=6) 
+        filtered_x = butter_bandpass_filter(self.total_spikes, 8, 12, 256.0, order=6) #filtrage entre 8 et 12 Hz
 
         self.curve_total_spikes.setData(self.timestamps, self.total_spikes)
         self.curve_filtered_spikes.setData(self.timestamps, filtered_x)
