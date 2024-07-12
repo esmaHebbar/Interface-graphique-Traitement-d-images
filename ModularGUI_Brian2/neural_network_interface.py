@@ -17,13 +17,12 @@ from PyQt5.QtWidgets import QLabel
 from brian2 import *
 from random import randint
 from simulate_hh import Simulate_hh
-from analysis_graphs import Calculate_mfr, Calculate_isi
+from analysis_graphs import Calculate_mfr, Calculate_isi, Calculate_active_neurons
 
 #--------------------------------------
-# Calcul avec le modèle
+# Model HH
 #--------------------------------------
 nb_neuron, statemon, I_monitor, spikemon, S = Simulate_hh()
-from analysis_graphs import Calculate_mfr, Calculate_isi, Calculate_active_neurons
 
 #--------------------------------------
 # Configure the appearance of pyqtgraph
@@ -198,7 +197,7 @@ isi_plot_widget.setLabel('bottom', 'Intervalle interspikes (ms)')
 isi_plot_widget.setTitle('Inter Spike Interval (ISI)')  # Ajouter un titre au graphique
 
 #--------------------------------------
-#  Tab for some data (simple functions)
+#  Tab for some data
 #--------------------------------------
 tab_active_neurons = QWidget()
 tab_widget.addTab(tab_active_neurons, "Active neurons")
