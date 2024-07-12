@@ -21,7 +21,7 @@ Le fichier exemple contient les données d'une image en teintes de gris représe
 ## Résultats pour différents seuils
 
 ### Détection des zones d'activation
-
+ 
 #### Seuil 2.2
 ![Zones d'activation seuil 2.2](./img/actives_zones_threshold_2.2.png)
 

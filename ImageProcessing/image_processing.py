@@ -190,6 +190,7 @@ grid_size = (32, 32) # For 1024 zones
 # time_contours = show_contours(data_cropped, threshold)
 sorted_active_zones, time_find_zones = find_most_active_zones(data_cropped, threshold, grid_size)
 # plot_grid(data_cropped, grid_size)
+# count_active_pixels_in_image(data_cropped,threshold)
 
 print("Most active zones in descending order within the grid:")
 for zone, count in sorted_active_zones:
@@ -206,5 +207,3 @@ print(f"Time taken to find most active zones : {time_find_zones:.4f} seconds")
 # row, col = 3, 3
 # count = count_active_pixels_in_zone(data_cropped, grid_size, row, col)
 # print(f"\nNumber of active pixels in the cell ({row}, {col}): {count} active pixels")
-
-count_active_pixels_in_image(data_cropped,threshold)

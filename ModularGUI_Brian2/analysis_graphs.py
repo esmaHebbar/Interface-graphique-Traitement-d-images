@@ -1,9 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Jun 2024
-
-@authors : Demets Guillaume & Hebbar Esma
-"""
 from brian2 import *
 import numpy as np
 
@@ -48,4 +42,3 @@ def Calculate_active_neurons(nb_neuron, spikemon):
     active_neurons = sorted([(i, mfr[i]) for i in range(nb_neuron)], key=lambda x: x[1], reverse=True)
     
     return active_neurons
-     

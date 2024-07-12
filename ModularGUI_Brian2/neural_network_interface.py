@@ -1,17 +1,6 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Jun 2024
-
-@authors : Demets Guillaume & Hebbar Esma
-
-"""
-#--------------------------------------
-# Importation des bibliothèques
-#--------------------------------------
 import numpy as np
 import pyqtgraph as pg
-
-from PyQt5.QtWidgets import QApplication, QMainWindow, QTabWidget, QWidget, QVBoxLayout, QTextEdit, QPushButton, QFileDialog
+from PyQt5.QtWidgets import QApplication, QMainWindow, QTabWidget, QWidget, QVBoxLayout, QTextEdit, QPushButton
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QLabel
 from brian2 import *
@@ -185,7 +174,7 @@ mfr_plot_widget.addItem(bar_graph)
 mfr_plot_widget.setLabel('left', 'Nombre de Spikes par neurones')
 mfr_plot_widget.setLabel('bottom', 'Numéro du neurone')
 mfr_plot_widget.setTitle('Nombre de décharges par neurones')
-
+ 
 # ISI
 x,y=Calculate_isi(nb_neuron,spikemon)
 

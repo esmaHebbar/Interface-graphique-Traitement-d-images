@@ -94,11 +94,11 @@ class Interface(QMainWindow):
 
     def update_scatter(self):
         try :     
-            ### variable pour stocker les résultats ###
+            ### Variables pour stocker les résultats ###
             x = []
             y = []
 
-            ### réception des données ###
+            ### Réception des données ###
             spk_tab = self.socket.recv(flags=zmq.NOBLOCK)
             for z in range(NB_FRAME_PER_BUFFER):
                 nid=0

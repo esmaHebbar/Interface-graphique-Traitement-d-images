@@ -89,4 +89,3 @@ def Simulate_hh():
     net.run(10*ms, report='text')
     
     return nb_neuron, statemon, I_monitor, spikemon, S
-
