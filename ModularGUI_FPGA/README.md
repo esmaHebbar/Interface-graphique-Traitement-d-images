@@ -1,4 +1,4 @@
-# Interface Graphique de Visualisation en Temps Réel
+# Interface graphique de visualisation en temps réel
 
 Ce projet implémente une interface utilisateur graphique (GUI) en utilisant PyQt5 pour visualiser les données d'une carte FPGA. Le système capte les données via une socket ZeroMQ.
 

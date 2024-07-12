@@ -20,13 +20,13 @@ from PyQt5.QtWidgets import QLabel
 from brian2 import *
 from random import randint
 from simulate_hh import Simulate_hh
-from ModularGUI_Brian2.analysis_graphs import Calculate_mfr, Calculate_isi
+from analysis_graphs import Calculate_mfr, Calculate_isi
 
 #--------------------------------------
 # On lance le modèle
 #--------------------------------------
 nb_neuron, statemon, I_monitor, spikemon, S = Simulate_hh()
-from ModularGUI_Brian2.analysis_graphs import Calculate_mfr, Calculate_isi, Calculate_active_neurons
+from analysis_graphs import Calculate_mfr, Calculate_isi, Calculate_active_neurons
 
 #--------------------------------------
 # Configure the appearance of pyqtgraph
