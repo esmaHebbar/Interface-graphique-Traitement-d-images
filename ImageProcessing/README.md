@@ -4,15 +4,15 @@ Ce folder contient des fonctions pour le traitement d'image, en particulier pour
 
 ## Fonctionnalités
 
-### Chargement et conversion du fichier Excel
+### Exemple d'image
 
-Le fichier Excel `data_image.xlsx` est chargé et converti en un tableau numpy. Ce fichier exemple contient les données d'une image en teintes de gris représentant un réseau neuronal.
+Le fichier exemple contient les données d'une image en teintes de gris représentant un réseau neuronal.
 
 ![Exemple d'image](./ExampleResults/image_originale_nuances_de_gris.png)
 
-### Fonctions principales
+### Focus sur les fonctions principales
   
-- **show_active_zones(image, threshold)** : Montre les zones actives en vert sur l'image pour un seuil donné.
+- **show_active_zones(image, threshold)** : Met en évidence les zones actives sur l'image pour un seuil donné.
 
 - **show_contours(image, threshold)** : Affiche les contours des zones actives sur l'image pour un seuil donné.
 
