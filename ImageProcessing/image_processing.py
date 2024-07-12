@@ -72,7 +72,7 @@ def show_active_zones(image: np.ndarray, threshold: int) -> float:
 #---------------------------------------------
 
 def show_contours(image: np.ndarray, threshold: int) -> float:
-    """Show contours of active zones on the image."""
+    """Show contours of active zones in green on the image."""
     start_time = time.time()
     binary_image = binarize_and_find_pixels(image, threshold)[0]
     contours = measure.find_contours(binary_image, 0.5)
@@ -116,10 +116,13 @@ def find_most_active_zones(image: np.ndarray, threshold: int, grid_size: tuple[i
     """Find and return coordinates of most active zones among the 1024 zones."""
     start_time = time.time()
     active_pixels = binarize_and_find_pixels(image, threshold)[1]
+
     height, width = image.shape
     rows, cols = grid_size
+
     cell_height = height / rows
     cell_width = width / cols
+
     active_zones = {}
     for pixel in active_pixels:
         row_index = int(pixel[0] // cell_height) + 1
@@ -129,7 +132,9 @@ def find_most_active_zones(image: np.ndarray, threshold: int, grid_size: tuple[i
             active_zones[grid_cell] += 1
         else:
             active_zones[grid_cell] = 1
+
     sorted_active_zones = sorted(active_zones.items(), key=lambda item: item[1], reverse=True)
+
     end_time = time.time()
     duration = end_time - start_time
     return sorted_active_zones, duration
@@ -202,3 +207,4 @@ print(f"Time taken to find most active zones : {time_find_zones:.4f} seconds")
 # count = count_active_pixels_in_zone(data_cropped, grid_size, row, col)
 # print(f"\nNumber of active pixels in the cell ({row}, {col}): {count} active pixels")
 
+count_active_pixels_in_image(data_cropped,threshold)
