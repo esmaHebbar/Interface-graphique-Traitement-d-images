@@ -1,0 +1,4 @@
+# ModularGUI_Brian2
+
+Ce répertoire contient le code pour le développement d'une interface graphique utilisant Brian2 pour simuler et analyser l'activité neuronale.
+
