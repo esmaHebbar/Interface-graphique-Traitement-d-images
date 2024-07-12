@@ -55,4 +55,4 @@ pip install -r requirements.txt
 - Guillaume Demets : gdemets@ensc.fr
 - Esma Hebbar : ehebbar001@ensc.fr
 
-Merci de votre intérêt pour notre projet !
+Merci de votre intérêt pour nos travaux !
