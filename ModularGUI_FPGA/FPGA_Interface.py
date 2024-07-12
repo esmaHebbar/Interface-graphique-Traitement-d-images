@@ -10,7 +10,7 @@ class Interface(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle('Interface graphique')
-        self.timer_interval = 10  # maj 100 ms
+        self.timer_interval = 100  # maj 100 ms
         self.setup_ui()
 
     def setup_ui(self):
@@ -45,24 +45,27 @@ class Interface(QMainWindow):
         self.layout.addWidget(self.plot_widget1) 
         self.scatter = pg.ScatterPlotItem(size=3, pen=pg.mkPen(width=3, color='k'))
         self.plot_widget1.addItem(self.scatter) 
-        self.plot_widget1.setLabel('left', 'Value')
-        self.plot_widget1.setLabel('bottom', 'Time')
+        self.plot_widget1.setTitle("Moments de décharges",color="k")
+        self.plot_widget1.setLabel('left', 'Indice du neurone')
+        self.plot_widget1.setLabel('bottom', 'Temps (ms)')
         self.plot_widget1.showGrid(x=True, y=True, alpha=0.3)
 
         ### Sum Plot ###
         pg.setConfigOption('background', 'w')
         self.plot_widget2 = pg.PlotWidget()
         self.layout.addWidget(self.plot_widget2)
-        self.plot_widget2.setLabel('left', 'Fréquence de décharge')
-        self.plot_widget2.setLabel('bottom', 'Indice du neurone')
+        self.plot_widget2.setTitle("Nombre de décharges (intervalle = 100ms)",color="k")
+        self.plot_widget2.setLabel('left', 'Nombre de décharges')
+        self.plot_widget2.setLabel('bottom', 'Temps (ms)')
         self.curve_total_spikes = self.plot_widget2.plot(pen='b', name="Total Spikes")
 
         ### Signal Plot ###
         pg.setConfigOption('background', 'w')
         self.plot_widget3 = pg.PlotWidget()
         self.layout.addWidget(self.plot_widget3)
-        self.plot_widget3.setLabel('left', 'Fréquence de décharge')
-        self.plot_widget3.setLabel('bottom', 'Indice du neurone')
+        self.plot_widget3.setTitle("Filtrage du signal",color="k")
+        self.plot_widget3.setLabel('left', 'Fréquence (Hz)')
+        self.plot_widget3.setLabel('bottom', 'Temps (ms)')
         self.curve_filtered_spikes = self.plot_widget3.plot(pen='r', name="Filtered Spikes")
 
         ### Initialisation de ZeroMQ ###
