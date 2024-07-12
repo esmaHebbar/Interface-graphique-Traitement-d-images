@@ -2,7 +2,7 @@
 
 Ce projet implémente une interface utilisateur graphique (GUI) en utilisant PyQt5 pour visualiser les données d'une carte FPGA. Le système capte les données via une socket ZeroMQ.
 
-## Introduction
+## Contexte
 
 Cette interface graphique a été développée pour permettre la visualisation en temps réel des données collectées par une carte FPGA. Elle fournit des outils pour analyser les moments de décharges neuronales et les fréquences de ces décharges, ainsi que pour filtrer ces données selon les ondes alpha. 
 
@@ -44,23 +44,3 @@ La seconde courbe permet de compter le nombre total de décharges pendant une du
 Le troisième graphe permet d'afficher le second graphe, mais filtré selon les ondes alpha, c'est-à-dire pour une fréquence comprise entre 8 et 12 Hz.
 
 ![Information pour la connexion de l'interface avec la carte](./img/plot_filter.png)
-
-## Prérequis
-
-Voici les bibliothèques nécessaires :
-
-- PyQt5
-- pyqtgraph
-- numpy
-- zmq
-- scipy
-
-Vous pouvez installer toutes les dépendances nécessaires avec la commande suivante :
-
-```bash
-pip install pyqt5 pyqtgraph numpy pyzmq scipy
-```
-
-
-
-
