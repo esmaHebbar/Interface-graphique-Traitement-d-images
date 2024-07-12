@@ -171,6 +171,8 @@ tab_stats.setLayout(tab_stats.layout)
 
 index, data = Calculate_mfr(nb_neuron, spikemon)
 
+# MFR 
+# le mfr n'est pas complet, le code actuel ne fait que compter le nombre de décharges par neurones
 # Créer le widget de tracé avec PyQtGraph
 mfr_plot_widget = pg.PlotWidget()
 tab_stats.layout.addWidget(mfr_plot_widget)
@@ -180,9 +182,9 @@ bar_graph = pg.BarGraphItem(x=index, height=data, width=0.6, brush='b')
 mfr_plot_widget.addItem(bar_graph)
 
 # Définir les étiquettes des axes et le titre du graphique
-mfr_plot_widget.setLabel('left', 'Nombre de Spikes par Secondes (Hz)')
+mfr_plot_widget.setLabel('left', 'Nombre de Spikes par neurones')
 mfr_plot_widget.setLabel('bottom', 'Numéro du neurone')
-mfr_plot_widget.setTitle('Mean Firing Rate Network (MFR)')
+mfr_plot_widget.setTitle('Nombre de décharges par neurones')
 
 # ISI
 x,y=Calculate_isi(nb_neuron,spikemon)
