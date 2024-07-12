@@ -15,7 +15,11 @@ L'interface peut mettre un certain temps à afficher l'interface, notamment selo
 ## Détails du contenu
 
 #### Fenêtre sur laquelle le rasterplot s'affiche
+
+Il est possible de cliquer sur les points du rasterplot afin d'afficher le potentiel membranaire correspondant.
+
 ![Fenêtre sur laquelle le rasterplot s'affiche](./img/rasterplot.png)
 
 #### Fenêtre présentant la connectivité synaptique
+
 ![Fenêtre présentant la connectivité synaptique](./img/synapse_connectivity.png)
