@@ -3,13 +3,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 from skimage import measure
 import PIL.Image as pim
+import time
 
 #---------------------------------------------
-# Loading and converting the Excel file to a numpy array
+# Converting the file or the image into a numpy array
 #---------------------------------------------
 
 # If Excel file:
-file_path = r'C:\Users\Guillaume\IG\stage1A\sujet1\data_image.xlsx'
+file_path = "./ImageProcessing/data_image.xlsx"
 data = pd.read_excel(file_path, header=None).to_numpy()
 
 # If image:
@@ -23,49 +24,56 @@ y_crop_bottom = 9
 data_cropped = data[y_crop_top:-y_crop_bottom, x_crop_left:-x_crop_right] 
 
 #---------------------------------------------
-# Function to plot original and cropped images
+# Function to plot images
 #---------------------------------------------
 
 def plot_images(data: np.ndarray, data_cropped: np.ndarray) -> None:
-    """Plot the original image and the cropped image."""
+    """Plot the images."""
     plt.imshow(data, cmap='gray') 
     plt.colorbar()
-    plt.title("Original Image")  
+    plt.title("Original image")  
     plt.show()
 
     plt.imshow(data_cropped, cmap='gray') 
     plt.colorbar()
-    plt.title("Cropped Image")  
+    plt.title("Cropped image")  
     plt.show()
 
 #---------------------------------------------
-# Function to binarize image and find active pixels
+# Function to binarize image and find the coordinates of the active pixels
 #---------------------------------------------
 
 def binarize_and_find_pixels(image: np.ndarray, threshold: int) -> tuple[np.ndarray, np.ndarray]:  
     """Binarize the image based on threshold and find active pixels."""
+    start_time = time.time()
     binary_image = image > threshold
-    return binary_image, np.argwhere(binary_image)
+    end_time = time.time()
+    duration = end_time - start_time
+    return binary_image, np.argwhere(binary_image), duration
 
 #---------------------------------------------
 # Function to show active zones in green
 #---------------------------------------------
 
-def show_active_zones(image: np.ndarray, threshold: int) -> None:
+def show_active_zones(image: np.ndarray, threshold: int) -> float:
     """Show active zones in green on the image."""
+    start_time = time.time()
     active_pixels = binarize_and_find_pixels(image, threshold)[1]
     plt.imshow(image, cmap='gray')
     for active_pixel in active_pixels:
         plt.plot(active_pixel[1], active_pixel[0], 'go', markersize=1)
     plt.title(f"Active zones highlighted with a {threshold} threshold")
     plt.show()
+    end_time = time.time()
+    return end_time - start_time
 
 #---------------------------------------------
-# Function to show contours of active zones
+# Function to show the contours of active zones
 #---------------------------------------------
 
-def show_contours(image: np.ndarray, threshold: int) -> None:
+def show_contours(image: np.ndarray, threshold: int) -> float:
     """Show contours of active zones on the image."""
+    start_time = time.time()
     binary_image = binarize_and_find_pixels(image, threshold)[0]
     contours = measure.find_contours(binary_image, 0.5)
     plt.imshow(image, cmap='gray')
@@ -73,6 +81,8 @@ def show_contours(image: np.ndarray, threshold: int) -> None:
         plt.plot(contour[:, 1], contour[:, 0], linewidth=2, color='green')
     plt.title(f"Contours of active zones for a {threshold} threshold")
     plt.show()
+    end_time = time.time()
+    return end_time - start_time
 
 #---------------------------------------------
 # Function to plot a grid on the image
@@ -104,32 +114,28 @@ def plot_grid(image: np.ndarray, grid_size: tuple[int, int]) -> None:
 
 def find_most_active_zones(image: np.ndarray, threshold: int, grid_size: tuple[int, int]) -> list[tuple[tuple[int, int], int]]:
     """Find and return coordinates of most active zones among the 1024 zones."""
+    start_time = time.time()
     active_pixels = binarize_and_find_pixels(image, threshold)[1]
-
     height, width = image.shape
     rows, cols = grid_size
-    
     cell_height = height / rows
     cell_width = width / cols
-    
     active_zones = {}
-
     for pixel in active_pixels:
         row_index = int(pixel[0] // cell_height) + 1
         col_index = int(pixel[1] // cell_width) + 1
         grid_cell = (row_index, col_index)
-        
         if grid_cell in active_zones:
             active_zones[grid_cell] += 1
         else:
             active_zones[grid_cell] = 1
-    
     sorted_active_zones = sorted(active_zones.items(), key=lambda item: item[1], reverse=True)
-    
-    return sorted_active_zones
+    end_time = time.time()
+    duration = end_time - start_time
+    return sorted_active_zones, duration
 
 #---------------------------------------------
-# Function to count number of active pixels in one of the 1024 zones
+# Function to count number of active pixels in one of the cell
 #---------------------------------------------
 
 def count_active_pixels_in_zone(image: np.ndarray, grid_size: tuple[int, int], row: int, col: int) -> int:
@@ -165,23 +171,34 @@ def count_active_pixels_in_image(image: np.ndarray, threshold: int) -> None:
     print(f"Percentage of active pixels in the image: {percent_active:.2f}%") 
 
 #---------------------------------------------
-# Function calls
+# Variables
 #---------------------------------------------
 
-threshold = 2.2
+threshold = 2.5
 grid_size = (32, 32) # For 1024 zones
 
-show_active_zones(data_cropped, threshold)
-show_contours(data_cropped, threshold)
-sorted_active_zones = find_most_active_zones(data_cropped, threshold, grid_size)
+#---------------------------------------------
+# Times taken and functions calls
+#---------------------------------------------
+
+# time_active_zones = show_active_zones(data_cropped, threshold)
+# time_contours = show_contours(data_cropped, threshold)
+sorted_active_zones, time_find_zones = find_most_active_zones(data_cropped, threshold, grid_size)
+# plot_grid(data_cropped, grid_size)
 
 print("Most active zones in descending order within the grid:")
 for zone, count in sorted_active_zones:
     print(f"\tZone {zone} : {count} active pixels")
 
-plot_grid(data_cropped, grid_size)
+# print(f"Time taken to show active zones : {time_active_zones:.4f} seconds")
+# print(f"Time taken to show contours : {time_contours:.4f} seconds")
+print(f"Time taken to find most active zones : {time_find_zones:.4f} seconds")
 
+#---------------------------------------------
 # To know how many pixels there is in the [row,col] cell
-row, col = 3, 3
-count = count_active_pixels_in_zone(data_cropped, grid_size, row, col)
-print(f"\nNumber of active pixels in zone ({row}, {col}): {count}")
+#---------------------------------------------
+
+# row, col = 3, 3
+# count = count_active_pixels_in_zone(data_cropped, grid_size, row, col)
+# print(f"\nNumber of active pixels in the cell ({row}, {col}): {count} active pixels")
+
