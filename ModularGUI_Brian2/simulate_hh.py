@@ -13,7 +13,7 @@ def Simulate_hh():
     defaultclock.dt = 0.005*ms  # Réduire de 0.01 ms à 0.005 ms
 
     # Number of neurons in the group
-    nb_neuron = 100
+    nb_neuron = 10
     
     # Hodgkin-Huxley model parameters
     Cm = 1.0*ufarad # Membrane capacitance
@@ -80,7 +80,7 @@ def Simulate_hh():
     HH.I = 0.0*uA
     net.run(10*ms, report='text')
     
-    HH.I = np.random.normal(60, 2.5, nb_neuron) * uA
+    HH.I = np.random.normal(60, 2.5, nb_neuron) * uA # random current for each neurons
     #HH.I = 60 * uA
 
     net.run(50*ms, report='text')

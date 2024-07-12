@@ -8,11 +8,8 @@ Created on Jun 2024
 #--------------------------------------
 # Importation des bibliothèques
 #--------------------------------------
-import sys
 import numpy as np
 import pyqtgraph as pg
-import random
-import matplotlib.pyplot as plt
 
 from PyQt5.QtWidgets import QApplication, QMainWindow, QTabWidget, QWidget, QVBoxLayout, QTextEdit, QPushButton, QFileDialog
 from PyQt5.QtCore import pyqtSignal
@@ -20,18 +17,16 @@ from PyQt5.QtWidgets import QLabel
 from brian2 import *
 from random import randint
 from simulate_hh import Simulate_hh
-from analysis_graphs import Calculate_mfr, Calculate_isi
+from analysis_graphs import Calculate_mfr, Calculate_isi, Calculate_active_neurons
 
 #--------------------------------------
-# On lance le modèle
+# Model HH
 #--------------------------------------
 nb_neuron, statemon, I_monitor, spikemon, S = Simulate_hh()
-from analysis_graphs import Calculate_mfr, Calculate_isi, Calculate_active_neurons
 
 #--------------------------------------
 # Configure the appearance of pyqtgraph
 #--------------------------------------
-
 pg.setConfigOption('background', 'w')
 
 # Application and main window creation
@@ -70,46 +65,8 @@ class InteractivePlotWidget(pg.PlotWidget):
         super().mousePressEvent(event)
 
 #--------------------------------------
-# First page : preferences
-#--------------------------------------
-tab_preferences = QWidget()
-tab_widget.addTab(tab_preferences, "Preferences")
-tab_preferences.layout = QVBoxLayout()
-tab_preferences.setLayout(tab_preferences.layout)
-
-# Button 1 to run HH model
-button_run = QPushButton("Run HH model")
-button_run.setMaximumWidth(200) 
-tab_preferences.layout.addWidget(button_run)
-
-nb_neuron, statemon, I_monitor, spikemon, S = Simulate_hh()
-
-button_run.clicked.connect(Simulate_hh)
-
-# Button 2to import data
-button_import = QPushButton("Import data in .csv")
-button_import.setMaximumWidth(200) 
-tab_preferences.layout.addWidget(button_import)
-
-def import_data():
-    import csv
-    options = QFileDialog.Options()
-    fileName, _ = QFileDialog.getOpenFileName(window, "Open CSV file", "", "CSV Files (*.csv)", options=options)
-    if fileName:
-        print("Importing data from:", fileName)
-        with open(fileName, 'r') as file:
-            reader = csv.reader(file)
-            for row in reader:
-                print(row) 
-    
-    print("Data imported successfully!")
-
-button_import.clicked.connect(import_data)
-
-#--------------------------------------
 # Oscilloscope tab
 #--------------------------------------
-
 tab_oscilloscope = QWidget()
 tab_widget.addTab(tab_oscilloscope, "Oscilloscope")
 tab_oscilloscope.layout = QVBoxLayout()
@@ -214,6 +171,8 @@ tab_stats.setLayout(tab_stats.layout)
 
 index, data = Calculate_mfr(nb_neuron, spikemon)
 
+# MFR 
+# le mfr n'est pas complet, le code actuel ne fait que compter le nombre de décharges par neurones
 # Créer le widget de tracé avec PyQtGraph
 mfr_plot_widget = pg.PlotWidget()
 tab_stats.layout.addWidget(mfr_plot_widget)
@@ -223,13 +182,11 @@ bar_graph = pg.BarGraphItem(x=index, height=data, width=0.6, brush='b')
 mfr_plot_widget.addItem(bar_graph)
 
 # Définir les étiquettes des axes et le titre du graphique
-mfr_plot_widget.setLabel('left', 'Nombre de Spikes par Secondes (Hz)')
+mfr_plot_widget.setLabel('left', 'Nombre de Spikes par neurones')
 mfr_plot_widget.setLabel('bottom', 'Numéro du neurone')
-mfr_plot_widget.setTitle('Mean Firing Rate Network (MFR)')
+mfr_plot_widget.setTitle('Nombre de décharges par neurones')
 
 # ISI
-
-#ISI
 x,y=Calculate_isi(nb_neuron,spikemon)
 
 isi_plot_widget = pg.PlotWidget()
@@ -241,12 +198,9 @@ isi_plot_widget.setLabel('left', 'Nombre d\'intervalles')
 isi_plot_widget.setLabel('bottom', 'Intervalle interspikes (ms)')
 isi_plot_widget.setTitle('Inter Spike Interval (ISI)')  # Ajouter un titre au graphique
 
-# IBI
-# TODO
 #--------------------------------------
-#  Tab for some data (simple functions)
+#  Tab for some data
 #--------------------------------------
-
 tab_active_neurons = QWidget()
 tab_widget.addTab(tab_active_neurons, "Active neurons")
 tab_active_neurons.layout = QVBoxLayout()
@@ -264,7 +218,6 @@ tab_active_neurons.layout.addWidget(data_label)
 #--------------------------------------
 #  Tab for synapses
 #--------------------------------------
-
 tab_synapses = QWidget()
 tab_widget.addTab(tab_synapses, "Synapse Connectivity")
 tab_synapses.layout = QVBoxLayout()
