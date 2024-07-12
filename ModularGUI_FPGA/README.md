@@ -61,28 +61,6 @@ Vous pouvez installer toutes les dépendances nécessaires avec la commande suiv
 pip install pyqt5 pyqtgraph numpy pyzmq scipy
 ```
 
-## Installation
 
-1. Clonez le dépôt :
 
-```bash
-git clone https://github.com/votre-utilisateur/votre-projet.git
-cd votre-projet
-```
-
-2. Installez les dépendances :
-
-```bash
-pip install -r requirements.txt
-```
-
-## Utilisation
-
-1. Lancez l'interface graphique :
-
-```bash
-python main.py
-```
-
-2. Suivez les instructions à l'écran pour visualiser les données en temps réel.
 
