@@ -2,7 +2,15 @@
 
 Ce répertoire contient le code pour le développement d'une interface graphique utilisant Brian2 pour simuler et analyser l'activité neuronale.
 
-## Exemple de pages visibles sur l'interface graphique
+## Contexte
+
+Cette interface graphique a été développée pour permettre la simulation d'un réseau neuronal suivant le modèle de Hodgkin-Huxley ainsi que sa visualisation au travers d'une interface graphique dynamique. Différentes fenêtres ont été implémentées, permettant la visualisation de différents graphes d'analyse. 
+
+## Informations générales
+
+L'interface peut mettre un certain temps à afficher l'interface, notamment selon le nombre de neurones choisi.
+
+## Détails du contenu
 
 #### Fenêtre sur laquelle le rasterplot s'affiche
 ![Fenêtre sur laquelle le rasterplot s'affiche](./img/rasterplot.png)

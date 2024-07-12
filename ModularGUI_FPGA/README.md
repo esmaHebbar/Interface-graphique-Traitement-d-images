@@ -1,6 +1,6 @@
-# Interface graphique de visualisation en temps réel
+# ModularGUI_FPGA
 
-Ce projet implémente une interface utilisateur graphique (GUI) en utilisant PyQt5 pour visualiser les données d'une carte FPGA. Le système capte les données via une socket ZeroMQ.
+Ce répertoire implémente une interface utilisateur graphique (Graphical User Interface) en utilisant PyQt5 pour visualiser les données d'une carte FPGA. Le système capte les données via une socket ZeroMQ.
 
 ## Contexte
 
@@ -19,6 +19,8 @@ Pour faire fonctionner l'interface :
 
 2. **Lancer la simulation** :
    - Utiliser MobaXterm pour lancer la simulation.
+   - Pour plus de détails concernant l'utilisation de la carte FPGA, consultez le répertoire suivant : [Ceramic-Blue-Tim_bioemus](https://github.com/Ceramic-Blue-Tim/bioemus).
+ 
 
 3. **Se connecter** :
    - Cliquez sur le bouton "Connect" dans l'interface pour établir la connexion et commencer la visualisation des données.
