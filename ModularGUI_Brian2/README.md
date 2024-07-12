@@ -10,6 +10,8 @@ Cette interface graphique a été développée pour permettre la simulation d'un
 
 L'interface peut mettre un certain temps à afficher l'interface, notamment selon le nombre de neurones choisi.
 
+**Le graphique du MFR n'est pas complet, le code actuel permet seulement de compter le nombre de décharges par neurone.**
+
 ## Détails du contenu
 
 #### Fenêtre sur laquelle le rasterplot s'affiche
