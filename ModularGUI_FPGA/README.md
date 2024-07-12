@@ -31,13 +31,19 @@ Pour faire fonctionner l'interface :
 
 La première courbe de l'interface permet de représenter les moments de décharges des neurones en fonction du temps.
 
+![Information pour la connexion de l'interface avec la carte](./img/plot_spk.png)
+
 ### Fréquences de décharges
 
 La seconde courbe permet de compter le nombre total de décharges pendant une durée de 100 ms et de l'afficher. L'affichage se fait selon la borne inférieure du temps. Par exemple, pour l'intervalle [100 - 199], l'affichage se fera au niveau de la borne 100.
 
+![Information pour la connexion de l'interface avec la carte](./img/plot_sum.png)
+
 ### Filtrage
 
 Le troisième graphe permet d'afficher le second graphe, mais filtré selon les ondes alpha, c'est-à-dire pour une fréquence comprise entre 8 et 12 Hz.
+
+![Information pour la connexion de l'interface avec la carte](./img/plot_filter.png)
 
 ## Prérequis
 
